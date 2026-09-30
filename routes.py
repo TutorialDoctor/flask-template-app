@@ -13,6 +13,11 @@ auth = Blueprint("auth", __name__, static_folder="static", template_folder="temp
 
     
 # General routes
+@routes.route("/ping", methods=["GET"])
+def ping():
+    return "pong"
+
+
 @routes.route("/", methods=["GET"])
 @login_required
 def home():

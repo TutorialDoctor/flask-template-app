@@ -6,6 +6,11 @@
 <h1 class="text-4xl">Index Page</h1>
 
 Admin: {{user.email}}
+<br/>
+
+<button hx-get="/ping" hx-swap="innerHTML">
+    PING
+</button>
 
 {% endblock%}
 
