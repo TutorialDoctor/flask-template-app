@@ -9,9 +9,12 @@ Admin: {{user.email}}
 
 <br/>
 
-<button hx-get="/ping" hx-swap="innerHTML">
+<button hx-get="/ping" hx-swap="innerHTML" hx-target="#swapper">
     PING
 </button>
+<br/>
+<pre id="swapper">
+</pre>
 
 {% endblock%}
 

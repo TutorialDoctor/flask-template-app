@@ -2,7 +2,6 @@
 
 - [ ] Add bcrypt and argon
 - [ ] Complete Component Library
-- [ ] Add
 
 # File Structure
 

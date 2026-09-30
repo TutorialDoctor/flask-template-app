@@ -17,7 +17,7 @@ auth = Blueprint("auth", __name__, static_folder="static", template_folder="temp
 # General routes
 @routes.route("/ping", methods=["GET"])
 def ping():
-    return "pong " + ScriptRunner.run('print.sh') + " " + BaseModule.name
+    return "PONG \n" + ScriptRunner.run_python('test.py') + " " + BaseModule.name
 
 @routes.route("/components", methods=["GET"])
 def components():
