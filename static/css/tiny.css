@@ -1,0 +1,918 @@
+/* ==========================================================================
+   tiny.css — hand-rolled utility classes for the Master Component Sheet
+   Same class names as the HTML already uses, so the Tailwind CDN <script>
+   can be removed. Link this file instead:
+     <link rel="stylesheet" href="tiny.css">
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Tokens
+   -------------------------------------------------------------------------- */
+:root {
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --green-300: #86efac;
+    --yellow-300: #fde047;
+
+    /* semantic (shadcn-style) tokens */
+    --background: #ffffff;
+    --primary: #18181b;
+    --primary-foreground: #fafafa;
+    --muted: #f4f4f5;
+    --muted-foreground: #71717a;
+    --accent: #f4f4f5;
+    --accent-foreground: #18181b;
+    --input: #e4e4e7;
+    --ring: #18181b;
+}
+
+/* --------------------------------------------------------------------------
+   2. Base reset (replaces Tailwind's preflight)
+-------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    border: 0 solid var(--gray-200);
+}
+
+html {
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+    margin: 0;
+    line-height: inherit;
+}
+
+p,
+ul,
+hr {
+    margin: 0;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+hr {
+    height: 0;
+    color: inherit;
+    border-top-width: 1px;
+}
+
+img,
+svg {
+    display: block;
+    vertical-align: middle;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+table {
+    border-collapse: collapse;
+    text-indent: 0;
+    border-color: inherit;
+}
+
+a {
+    color: inherit;
+    text-decoration: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+    color: inherit;
+    margin: 0;
+    padding: 0;
+}
+
+button {
+    background: transparent;
+    cursor: pointer;
+    text-transform: none;
+}
+
+textarea {
+    resize: vertical;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--gray-400);
+}
+
+/* --------------------------------------------------------------------------
+   3. Display & position
+   -------------------------------------------------------------------------- */
+.block {
+    display: block;
+}
+
+.inline-block {
+    display: inline-block;
+}
+
+.flex {
+    display: flex;
+}
+
+.inline-flex {
+    display: inline-flex;
+}
+
+.grid {
+    display: grid;
+}
+
+.relative {
+    position: relative;
+}
+
+.absolute {
+    position: absolute;
+}
+
+.sticky {
+    position: sticky;
+}
+
+.top-0 {
+    top: 0;
+}
+
+.right-0 {
+    right: 0;
+}
+
+.bottom-4 {
+    bottom: 1rem;
+}
+
+.float-right {
+    float: right;
+}
+
+.overflow-y-scroll {
+    overflow-y: scroll;
+}
+
+.pointer-events-none {
+    pointer-events: none;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* --------------------------------------------------------------------------
+   4. Flexbox & grid
+   -------------------------------------------------------------------------- */
+.flex-col {
+    flex-direction: column;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.shrink-0 {
+    flex-shrink: 0;
+}
+
+.items-start {
+    align-items: flex-start;
+}
+
+.items-end {
+    align-items: flex-end;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.items-stretch {
+    align-items: stretch;
+}
+
+.justify-start {
+    justify-content: flex-start;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.align-middle {
+    vertical-align: middle;
+}
+
+.grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.grid-cols-7 {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.grid-cols-12 {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+.col-span-2 {
+    grid-column: span 2 / span 2;
+}
+
+.col-span-4 {
+    grid-column: span 4 / span 4;
+}
+
+.col-span-5 {
+    grid-column: span 5 / span 5;
+}
+
+.col-span-8 {
+    grid-column: span 8 / span 8;
+}
+
+.col-span-10 {
+    grid-column: span 10 / span 10;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
+.gap-4 {
+    gap: 1rem;
+}
+
+.gap-3 {
+    gap: 0.75rem;
+}
+
+.gap-x-2 {
+    column-gap: 0.5rem;
+}
+
+.gap-x-4 {
+    column-gap: 1rem;
+}
+
+.gap-x-6 {
+    column-gap: 1.5rem;
+}
+
+.gap-y-2 {
+    row-gap: 0.5rem;
+}
+
+.gap-y-4 {
+    row-gap: 1rem;
+}
+
+.space-x-2>*+* {
+    margin-left: 0.5rem;
+}
+
+.space-y-2>*+* {
+    margin-top: 0.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   5. Spacing (padding first so px/py can override p)
+   -------------------------------------------------------------------------- */
+.p-1 {
+    padding: 0.25rem;
+}
+
+.p-2 {
+    padding: 0.5rem;
+}
+
+.p-3 {
+    padding: 0.75rem;
+}
+
+.p-4 {
+    padding: 1rem;
+}
+
+.p-8 {
+    padding: 2rem;
+}
+
+.px-2 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.px-3 {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+
+.px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.py-2 {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.pt-2 {
+    padding-top: 0.5rem;
+}
+
+.pt-4 {
+    padding-top: 1rem;
+}
+
+.pb-2 {
+    padding-bottom: 0.5rem;
+}
+
+.m-4 {
+    margin: 1rem;
+}
+
+.my-2 {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.mt-1 {
+    margin-top: 0.25rem;
+}
+
+.mt-2 {
+    margin-top: 0.5rem;
+}
+
+.mt-3 {
+    margin-top: 0.75rem;
+}
+
+.mt-4 {
+    margin-top: 1rem;
+}
+
+.mt-8 {
+    margin-top: 2rem;
+}
+
+.mb-4 {
+    margin-bottom: 1rem;
+}
+
+.mr-4 {
+    margin-right: 1rem;
+}
+
+.-mr-2 {
+    margin-right: -0.5rem;
+}
+
+.ml-2 {
+    margin-left: 0.5rem;
+}
+
+.ml-3 {
+    margin-left: 0.75rem;
+}
+
+.ml-4 {
+    margin-left: 1rem;
+}
+
+.ml-auto {
+    margin-left: auto;
+}
+
+/* --------------------------------------------------------------------------
+   6. Sizing
+   -------------------------------------------------------------------------- */
+.w-full {
+    width: 100%;
+}
+
+.w-auto {
+    width: auto;
+}
+
+.w-max {
+    width: max-content;
+}
+
+.w-1\/2 {
+    width: 50%;
+}
+
+.w-1\/3 {
+    width: 33.333333%;
+}
+
+.w-1\/5 {
+    width: 20%;
+}
+
+.w-2\/5 {
+    width: 40%;
+}
+
+.w-3\/4 {
+    width: 75%;
+}
+
+.w-8\/12 {
+    width: 66.666667%;
+}
+
+.w-4 {
+    width: 1rem;
+}
+
+.w-5 {
+    width: 1.25rem;
+}
+
+.w-8 {
+    width: 2rem;
+}
+
+.w-9 {
+    width: 2.25rem;
+}
+
+.w-32 {
+    width: 8rem;
+}
+
+.w-\[30px\] {
+    width: 30px;
+}
+
+.w-\[200px\] {
+    width: 200px;
+}
+
+.h-2 {
+    height: 0.5rem;
+}
+
+.h-4 {
+    height: 1rem;
+}
+
+.h-5 {
+    height: 1.25rem;
+}
+
+.h-8 {
+    height: 2rem;
+}
+
+.h-9 {
+    height: 2.25rem;
+}
+
+.h-10 {
+    height: 2.5rem;
+}
+
+.h-32 {
+    height: 8rem;
+}
+
+.h-\[20px\] {
+    height: 20px;
+}
+
+.h-\[40px\] {
+    height: 40px;
+}
+
+.h-\[50px\] {
+    height: 50px;
+}
+
+.h-\[64px\] {
+    height: 64px;
+}
+
+.h-\[70px\] {
+    height: 70px;
+}
+
+.h-\[260px\] {
+    height: 260px;
+}
+
+.h-\[300px\] {
+    height: 300px;
+}
+
+.max-w-8 {
+    max-width: 2rem;
+}
+
+.max-w-\[75\%\] {
+    max-width: 75%;
+}
+
+.object-contain {
+    object-fit: contain;
+}
+
+.object-cover {
+    object-fit: cover;
+}
+
+.object-top {
+    object-position: top;
+}
+
+/* --------------------------------------------------------------------------
+   7. Typography
+   -------------------------------------------------------------------------- */
+.text-xs {
+    font-size: 0.75rem;
+    line-height: 1rem;
+}
+
+.text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+}
+
+.text-xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+}
+
+.text-2xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+}
+
+/* weights: light -> bold, so the later one wins when two are combined */
+.font-light {
+    font-weight: 300;
+}
+
+.font-medium {
+    font-weight: 500;
+}
+
+.font-semibold {
+    font-weight: 600;
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.capitalize {
+    text-transform: capitalize;
+}
+
+.lowercase {
+    text-transform: lowercase;
+}
+
+.whitespace-nowrap {
+    white-space: nowrap;
+}
+
+/* your own typo'd class name, kept working as intended */
+.ellipis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --------------------------------------------------------------------------
+   8. Colors
+   -------------------------------------------------------------------------- */
+.text-white {
+    color: #fff;
+}
+
+.text-black {
+    color: #000;
+}
+
+.text-gray-400 {
+    color: var(--gray-400);
+}
+
+.text-gray-500 {
+    color: var(--gray-500);
+}
+
+.text-gray-600 {
+    color: var(--gray-600);
+}
+
+.text-gray-700 {
+    color: var(--gray-700);
+}
+
+.text-muted-foreground {
+    color: var(--muted-foreground);
+}
+
+.bg-white {
+    background-color: #fff;
+}
+
+.bg-black {
+    background-color: #000;
+}
+
+.bg-gray-50 {
+    background-color: var(--gray-50);
+}
+
+.bg-gray-100 {
+    background-color: var(--gray-100);
+}
+
+.bg-gray-200 {
+    background-color: var(--gray-200);
+}
+
+.bg-gray-300 {
+    background-color: var(--gray-300);
+}
+
+.bg-green-300 {
+    background-color: var(--green-300);
+}
+
+.bg-yellow-300 {
+    background-color: var(--yellow-300);
+}
+
+.bg-primary {
+    background-color: var(--primary);
+}
+
+.bg-input {
+    background-color: var(--input);
+}
+
+.accent-black {
+    accent-color: #000;
+}
+
+/* --------------------------------------------------------------------------
+   9. Borders, outlines, radius, shadows
+   -------------------------------------------------------------------------- */
+.border {
+    border-width: 1px;
+}
+
+.border-2 {
+    border-width: 2px;
+}
+
+.border-4 {
+    border-width: 4px;
+}
+
+.border-b {
+    border-bottom-width: 1px;
+}
+
+.border-gray-300 {
+    border-color: var(--gray-300);
+}
+
+.border-white {
+    border-color: #fff;
+}
+
+.border-primary {
+    border-color: var(--primary);
+}
+
+.border-transparent {
+    border-color: transparent;
+}
+
+.outline-dashed {
+    outline-style: dashed;
+}
+
+.outline-1 {
+    outline-width: 1px;
+}
+
+.outline-gray-300 {
+    outline-color: var(--gray-300);
+}
+
+.outline-none {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+}
+
+.rounded-sm {
+    border-radius: 0.125rem;
+}
+
+.rounded-md {
+    border-radius: 0.375rem;
+}
+
+.rounded-lg {
+    border-radius: 0.5rem;
+}
+
+.rounded-full {
+    border-radius: 9999px;
+}
+
+.rounded-l-lg {
+    border-top-left-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
+}
+
+.shadow-sm {
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.shadow {
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.shadow-md {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.shadow-lg {
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.ring-0 {
+    box-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+   10. Transitions & transforms
+   -------------------------------------------------------------------------- */
+.transition-colors {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+}
+
+.transition-transform {
+    transition-property: transform;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+}
+
+/* --------------------------------------------------------------------------
+   11. State & variant classes
+   -------------------------------------------------------------------------- */
+
+/* hover */
+.hover\:bg-gray-100:hover {
+    background-color: var(--gray-100);
+}
+
+.hover\:bg-accent:hover {
+    background-color: var(--accent);
+}
+
+.hover\:bg-muted\/50:hover {
+    background-color: color-mix(in srgb, var(--muted) 50%, transparent);
+}
+
+.hover\:text-accent-foreground:hover {
+    color: var(--accent-foreground);
+}
+
+/* focus-visible */
+.focus-visible\:outline-none:focus-visible {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+}
+
+.focus-visible\:ring-1:focus-visible {
+    box-shadow: 0 0 0 1px var(--ring);
+}
+
+.focus-visible\:ring-2:focus-visible {
+    box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring);
+}
+
+/* disabled */
+.disabled\:cursor-not-allowed:disabled {
+    cursor: not-allowed;
+}
+
+.disabled\:opacity-50:disabled {
+    opacity: 0.5;
+}
+
+.disabled\:pointer-events-none:disabled {
+    pointer-events: none;
+}
+
+/* data-state */
+.data-\[state\=selected\]\:bg-muted[data-state="selected"] {
+    background-color: var(--muted);
+}
+
+.data-\[state\=checked\]\:bg-primary[data-state="checked"] {
+    background-color: var(--primary);
+}
+
+.data-\[state\=checked\]\:text-primary-foreground[data-state="checked"] {
+    color: var(--primary-foreground);
+}
+
+.data-\[state\=checked\]\:translate-x-4[data-state="checked"] {
+    transform: translateX(1rem);
+}
+
+.data-\[state\=unchecked\]\:bg-input[data-state="unchecked"] {
+    background-color: var(--input);
+}
+
+.data-\[state\=unchecked\]\:translate-x-0[data-state="unchecked"] {
+    transform: translateX(0);
+}
+
+/* dark mode (follows the OS setting) */
+@media (prefers-color-scheme: dark) {
+    .dark\:bg-gray-800 {
+        background-color: var(--gray-800);
+    }
+}
+
+/* --------------------------------------------------------------------------
+   12. Misc (kept last so it wins over display utilities)
+   -------------------------------------------------------------------------- */
+.appearance-none {
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.hidden {
+    display: none;
+}

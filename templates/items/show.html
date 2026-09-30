@@ -8,10 +8,10 @@
 <div class="container my-4">
   <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-      <h2>Item Details #{{ item.id }}</h2>
       <a href="{{ url_for('routes.items') }}" class="btn btn-outline-secondary">
         &larr; Back to Items
       </a>
+      <h2 class="mt-4">Item Details #{{ item.id }}</h2>
     </div>
     <div class="card-body">
       <h3 class="card-title">{{ item.name }}</h3>
@@ -24,7 +24,7 @@
         Created: {{ item.created_at.strftime('%Y-%m-%d %H:%M') if item.created_at else 'N/A' }}
       </p>
     </div>
-    <div class="card-footer d-flex gap-2">
+    <div class="card-footer flex gap-2">
       {# Link to Edit mode via ?action=edit #}
       <a href="{{ url_for('routes.items', id=item.id, action='edit') }}" class="btn btn-warning">
         Edit

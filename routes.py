@@ -11,11 +11,15 @@ from flask_login import (
 routes = Blueprint("routes", __name__, static_folder="static", template_folder="templates")
 auth = Blueprint("auth", __name__, static_folder="static", template_folder="templates")
 
-    
 # General routes
 @routes.route("/ping", methods=["GET"])
 def ping():
     return "pong"
+
+# General routes
+@routes.route("/components", methods=["GET"])
+def components():
+    return render_template("components/master_components.html")
 
 
 @routes.route("/", methods=["GET"])

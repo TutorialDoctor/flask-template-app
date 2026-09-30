@@ -2,10 +2,10 @@
 
 {% block content %}
 <div class="container my-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="flex justify-content-between align-items-center mb-3">
     <h1 class="text-4xl">Items</h1>
     {# Points to /items?action=new #}
-    <a href="{{ url_for('routes.items', action='new') }}" class="btn btn-primary">
+    <a href="{{ url_for('routes.items', action='new') }}" class="ml-2 btn btn-primary">
       + Add New Item
     </a>
   </div>
