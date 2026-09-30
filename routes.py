@@ -8,19 +8,20 @@ from flask_login import (
     logout_user,
 )
 
+from modules.BaseModule import BaseModule
+from modules.ScriptRunner import ScriptRunner
+
 routes = Blueprint("routes", __name__, static_folder="static", template_folder="templates")
 auth = Blueprint("auth", __name__, static_folder="static", template_folder="templates")
 
 # General routes
 @routes.route("/ping", methods=["GET"])
 def ping():
-    return "pong"
+    return "pong " + ScriptRunner.run('print.sh') + " " + BaseModule.name
 
-# General routes
 @routes.route("/components", methods=["GET"])
 def components():
     return render_template("components/master_components.html")
-
 
 @routes.route("/", methods=["GET"])
 @login_required
@@ -39,7 +40,12 @@ def contact():
     return render_template("contact.html")
 
 
-# Create user
+# CREATE - USER
+@routes.route("/users/new", methods=["GET"])
+@login_required
+def new_user():
+    return render_template("users/new.html")
+
 @routes.route("/users/create", methods=["GET", "POST"])
 @login_required
 def create_user():
@@ -79,7 +85,7 @@ def user_index():
 
     return render_template("users/index.html", users=users)
 
-
+# RETRIEVE - USER
 @routes.route("/users/<int:user_id>", methods=["GET"])
 @login_required
 @cache.cached(timeout=50)
@@ -103,8 +109,7 @@ def show_user(user_id):
 
     return render_template("shared/404.html"), 404
 
-
-# Edit user
+# UPDATE - USER
 @routes.route("/users/<int:user_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_user(user_id):
@@ -135,14 +140,7 @@ def edit_user(user_id):
 
     return render_template("users/edit.html", user=user)
 
-
-# New user
-@routes.route("/users/new", methods=["GET"])
-@login_required
-def new_user():
-    return render_template("users/new.html")
-
-# Delete user
+# DELETE - USER
 @routes.route("/users/<int:user_id>/delete", methods=["POST", "GET"])
 @login_required
 def delete_user(user_id):
