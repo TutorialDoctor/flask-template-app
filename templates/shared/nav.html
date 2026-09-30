@@ -1,0 +1,22 @@
+<nav class="p-2 border-b">
+    <ul class="flex justify-start items-center gap-2">
+        <li><a href="{{url_for('routes.home')}}">Home</a></li>
+        <li><a href="{{url_for('routes.contact')}}">Contact</a></li>
+        {%if current_user.is_authenticated%}
+            <li><a href="{{url_for('auth.logout')}}">Logout</a></li>
+            <li><a href="{{url_for('routes.user_index')}}">Users</a></li>
+            <li><a href="{{url_for('routes.items')}}">Items</a></li>
+        {%endif%}
+        <li class="ml-auto">
+            <div class="flex items-center">
+                <span>{{current_user.first_name}} {{current_user.last_name}}</span>
+                {%if current_user.profile_img%}
+                <img class="inline h-6 rounded-full object-cover" src="{{current_user.profile_img}}">
+                {%else%}
+                <img class="ml-2 inline h-8 w-8 rounded-full object-cover object-center"
+                    src="https://images.prismic.io/upskil/ZrvZvEaF0TcGI6NT_55f5c200-1c67-4df3-89f2-82f5a25913f1.webp?auto=format,compress">
+                {%endif%}
+            </div>
+        </li>
+    </ul>
+</nav>

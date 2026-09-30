@@ -1,0 +1,12 @@
+{% extends 'shared/layout.html' %}
+
+
+{% block content %}
+<h1 class="text-4xl">Edit Item</h1>
+
+<form class="grid gap-2" method="POST" action="/items/{{item.id}}">
+	<input name="name" value="{{item.name}}">
+	<input name="description" value="{{item.description}}">
+    <input type="submit" value="Submit">
+</form>
+{% endblock %}

@@ -1,0 +1,8 @@
+flask
+
+flask_login
+
+peewee
+
+flask_caching
+

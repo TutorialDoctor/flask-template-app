@@ -1,0 +1,33 @@
+{%extends 'shared/layout.html'%}
+
+{%block content%}
+
+  <h1 class="text-4xl">Edit {{user.first_name}} {{user.last_name}}</h1>
+
+
+<form class="mt-4" action="{{url_for('routes.edit_user', user_id=user.id)}}" method="POST">
+
+  <img class="w-32 h-32 object-cover" alt="User avatar" src="{{user.profile_img}}" />
+
+  <div class="mt-2 grid grid-cols-4 gap-4">
+  <input type="email" name="email" id="email" value="{{user.email}}" placeholder="email@example.com" />
+
+  <input type="text" name="profile_img" value="{{user.profile_img}}" id="profile_img" placeholder="http://" />
+
+  <input type="text" name="first_name" id="first_name" value="{{user.first_name}}" placeholder="Charly" />
+
+  <input type="text" name="last_name" id="last_name" value="{{user.last_name}}" placeholder="Olivas" />
+
+  <input type="text" name="phone" id="phone" value="{{user.phone}}" placeholder="12341234" />
+
+  <input type="text" name="address" id="address" value="{{user.address}}" placeholder="123 St." />
+
+  <input type="password" placeholder="New" />
+
+  <input
+    type="submit" placeholder="Update" />
+  </div>
+
+</form>
+
+{%endblock%}

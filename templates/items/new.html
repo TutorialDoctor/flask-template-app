@@ -1,0 +1,12 @@
+{% extends 'shared/layout.html' %}
+
+
+{% block content %}
+<h1 class="text-4xl">New Item</h1>
+
+<form class="grid gap-4" method="POST" action="/items">
+	<input name="name" placeholder="name">
+	<input name="description" placeholder="description">
+    <input type="submit" value="Submit">
+</form>
+{% endblock %}

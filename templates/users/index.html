@@ -1,0 +1,24 @@
+{%extends 'shared/layout.html'%}
+
+{%block content%}
+
+<h1 class="text-4xl">Users</h1>
+
+{% for user in users %}
+
+<div class="border rounded-lg p-4">
+    <p>Name:  {{user.first_name}} {{user.last_name}}</p>
+    <p>Email: {{user.email}}</p>
+</div>
+
+<div class="my-4">
+<a href="{{url_for('routes.show_user', user_id=user.id)}}">See</a>
+
+<a href="{{url_for('routes.edit_user', user_id=user.id)}}">Edit</a>
+
+<a href="{{url_for('routes.new_user')}}">New</a>
+</div>
+
+{% endfor %}
+
+{%endblock%}

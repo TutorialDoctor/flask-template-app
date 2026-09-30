@@ -1,0 +1,54 @@
+{%extends 'shared/layout.html'%}
+
+{%block content%}
+
+
+<h1 class="text-3xl">{{user.first_name}} {{user.last_name}}</h1>
+<img class="w-32 h-32 object-cover" src="{{user.profile_img}}" alt="">
+
+{{user.profile_img}}
+
+<h1 class="text-2xl">Other users</h1>
+
+{% for u in similar_users %}
+
+<div>
+
+    <img class="w-32 h-32 object-cover" src="{{u.profile_img}}" alt="">
+
+    <a href="{{url_for('routes.show_user', user_id=u.id)}}">{{u.first_name}}</a>
+
+</div>
+
+{%endfor%}
+
+{{user.first_name}}
+
+{{user.last_name}}
+
+<a href="tel:{{user.phone | phone}}">{{user.phone | phone}}</a>
+
+{{user.address}}
+
+<a href="mailto:{{user.email}}">{{user.email}}</a>
+
+<h2>
+    <p>Bio</p>
+    {{user.info.address}}
+</h2>
+
+<hr>
+ITEMS
+<!-- {{user_items}} -->
+{%for item in user_items%}
+    {{item.name}}<br/>
+    {{item.numeral_name}}
+    {{item.numeral}}
+{%endfor%}
+
+
+<a href="{{ url_for('routes.delete_user', user_id=user.id) }}">Delete</a>
+
+
+
+{%endblock%}
