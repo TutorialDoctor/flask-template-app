@@ -10,6 +10,7 @@ from flask_login import (
 
 from modules.BaseModule import BaseModule
 from modules.ScriptRunner import ScriptRunner
+from modules.PasswordGenerator import PasswordGenerator
 
 routes = Blueprint("routes", __name__, static_folder="static", template_folder="templates")
 auth = Blueprint("auth", __name__, static_folder="static", template_folder="templates")
@@ -17,7 +18,8 @@ auth = Blueprint("auth", __name__, static_folder="static", template_folder="temp
 # General routes
 @routes.route("/ping", methods=["GET"])
 def ping():
-    return "PONG \n" + ScriptRunner.run_python('test.py') + " " + BaseModule.name
+    password = PasswordGenerator.generate_passwords(includes=['tutorial','doctor','github','2026'])
+    return "PONG \n" + ScriptRunner.run_python('test.py') + " " + BaseModule.name + "\n" + password
 
 @routes.route("/components", methods=["GET"])
 def components():
