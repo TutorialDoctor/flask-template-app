@@ -1,0 +1,102 @@
+<!-- Center Section: Title, Sub-tabs, and Table (8 cols or 9 cols) -->
+<div>
+    <!-- Section Header -->
+    <div>
+        <p class="font-medium text-2xl">Users</p>
+        <p class="text-gray-500" style="font-size: .75rem">Manager your account settings and set e-mail preferences.
+        </p>
+
+        <div class="mt-4 flex justify-between">
+            <div class="w-2/5 rounded-lg text-xs bg-gray-100 p-1 gap-x-2">
+                <button class="inline-block shadow-sm p-1 bg-white rounded-md" role="tab">All Users</button>
+                <button class="inline-block ml-4 p-1 text-gray-500 rounded-md" role="tab">Roles</button>
+                <button class="inline-block ml-4 p-1 text-gray-500 rounded-md" role="tab">Permission</button>
+
+            </div>
+            <button class="text-center text-xs bg-black text-white px-4 py-2 rounded-lg flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor"
+                    class="bi bi-plus-circle" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"></path>
+                    <path
+                        d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4">
+                    </path>
+                </svg>
+
+
+                <span class="ml-2">
+                    <a href="{{url_for('routes.items', action='new')}}">Add User</a>
+                </span>
+            </button>
+        </div>
+
+        <hr class="mt-4">
+    </div>
+
+    <!-- Table Container -->
+    <div
+        class="relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default h-[800px]">
+        <table class="w-full text-sm text-left rtl:text-right text-body">
+            <thead class="text-sm text-body bg-neutral-secondary-soft border-b rounded-base border-default">
+                <tr class="bg-gray-50">
+                    <th scope="col" class="px-6 py-3 font-medium">Full Name</th>
+                    <th scope="col" class="px-6 py-3 font-medium">Email</th>
+                    <th scope="col" class="px-6 py-3 font-medium">Phone</th>
+                    <th scope="col" class="px-6 py-3 font-medium">Address</th>
+                    <th scope="col" class="px-6 py-3 font-medium">State</th>
+                    <th scope="col" class="px-6 py-3 font-medium">City</th>
+                    <th scope="col" class="px-6 py-3 font-medium">ZIP</th>
+                    <th scope="col" class="px-6 py-3 font-medium">Website</th>
+                    <th scope="col" class="px-6 py-3 font-medium">Occupation</th>
+                    <th scope="col" class="px-6 py-3 font-medium">Weight</th>
+                    <th scope="col" class="px-6 py-3 font-medium">Height</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr class="bg-neutral-primary border-b border-default">
+                    <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">
+                        {{ user.first_name }} {{ user.last_name }}
+                    </th>
+                    <td class="px-6 py-4">{{ user.email }}</td>
+                    <td class="px-6 py-4">{{ user.phone or '323-323-23232' }}</td>
+                    <td class="px-6 py-4">{{ user.address or '231 Harris St' }}</td>
+                    <td class="px-6 py-4">{{ user.state or 'NY' }}</td>
+                    <td class="px-6 py-4">{{ user.city or 'New York' }}</td>
+                    <td class="px-6 py-4">{{ user.zip or '50399' }}</td>
+                    <td class="px-6 py-4">{{ user.website or 'http://www.helpers.com' }}</td>
+                    <td class="px-6 py-4">{{ user.info.occupation or 'Interior Designer' }}</td>
+                    <td class="px-6 py-4">{{ user.weight or '200lb' }}</td>
+                    <td class="px-6 py-4">{{ user.height or "6' 1\"" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Right-Hand Side Form: Create User -->
+<div class="hidden col-span-12 lg:col-span-3 border border-default rounded-base p-5 bg-neutral-primary h-fit">
+    <h2 class="font-bold text-lg text-heading">Create User</h2>
+    <p class="text-xs text-body mb-4">Manage your cookie settings here.</p>
+
+    <form action="/admin/users/create" method="POST" class="space-y-4">
+        <div>
+            <label class="block text-xs font-medium text-heading mb-1">Email</label>
+            <input type="email" name="email" placeholder="Enter your name"
+                class="w-full text-xs p-2.5 border border-default rounded-base bg-transparent">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-heading mb-1">First Name</label>
+            <input type="text" name="first_name" placeholder="Enter your name"
+                class="w-full text-xs p-2.5 border border-default rounded-base bg-transparent">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-heading mb-1">Last Name</label>
+            <input type="text" name="last_name" placeholder="Enter your name"
+                class="w-full text-xs p-2.5 border border-default rounded-base bg-transparent">
+        </div>
+        <button type="submit" class="w-full py-2 bg-black text-white text-xs rounded-base font-medium mt-4">
+            Create
+        </button>
+    </form>
+</div>

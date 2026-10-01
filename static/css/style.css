@@ -221,6 +221,14 @@ img{
 }
 /* layout */
 
+.uppercase {
+  text-transform: uppercase;
+}
+
+.lowercase {
+  text-transform: lowercase;
+}
+
 .flex { display: flex; }
 .grid { display: grid; }
 .block { display: block; }

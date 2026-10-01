@@ -16,10 +16,45 @@ routes = Blueprint("routes", __name__, static_folder="static", template_folder="
 auth = Blueprint("auth", __name__, static_folder="static", template_folder="templates")
 
 # General routes
+# @routes.route("/admin", methods=["GET"])
+# def admin():
+#     users = (
+#             User
+#             .select()
+#             .order_by(User.created_at.desc())
+#         )
+#     return render_template("admin.html", users=users)
+
+# Full Page Route (Initial Load)
+@routes.route('/admin')
+@routes.route('/admin/users')
+def admin_users():
+    users = (
+                User
+                .select()
+                .order_by(User.created_at.desc())
+            )
+    # If request comes from HTMX, return ONLY the partial content
+    if request.headers.get('HX-Request'):
+        return render_template('partials/_users_content.html', users=users)
+        
+    # Otherwise render full page layout
+    return render_template('admin.html', active_tab='users', users=users)
+
+@routes.route('/admin/items')
+def admin_items():
+    items = Item.select().order_by(Item.created_at.desc())
+    
+    if request.headers.get('HX-Request'):
+        return render_template('partials/_items_content.html', items=items)
+        
+    return render_template('admin.html', active_tab='items', items=items)
+    
+# General routes
 @routes.route("/ping", methods=["GET"])
 def ping():
     password = PasswordGenerator.generate_passwords(includes=['tutorial','doctor','github','2026'])
-    return "PONG \n" + ScriptRunner.run_python('test.py') + " " + BaseModule.name + "\n" + password
+    return "PONG \n" + ScriptRunner.run_python('test.py')  + BaseModule.name + "\nPassword: \n" + password
 
 @routes.route("/components", methods=["GET"])
 def components():
@@ -28,9 +63,8 @@ def components():
 @routes.route("/", methods=["GET"])
 @login_required
 def home():
-    user = User.get_or_none(User.email == "td@gmail.com")
+    user = User.get_or_none(User.email == "admin@gmail.com")
     return render_template("index.html", user=user)
-
 
 @routes.route("/about", methods=["GET"])
 def about():

@@ -11,6 +11,13 @@ def register_filters(app):
         except Exception:
             return ""
 
+    @app.template_filter("labelize")
+    def labelize(text):
+        try:
+            return text.replace("_"," ")
+        except Exception:
+                return ""
+
     @app.template_filter("phone")
     def phone_format(n):
         try:

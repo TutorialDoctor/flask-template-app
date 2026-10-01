@@ -1,11 +1,12 @@
-<nav class="p-2 border-b">
-    <ul class="flex justify-start items-center gap-2">
+<nav class="text-xs py-2 px-4 w-full border-b">
+    <ul class="flex justify-start gap-4 flex-wrap items-center">
         <li><a href="{{url_for('routes.home')}}">Home</a></li>
         <li><a href="{{url_for('routes.contact')}}">Contact</a></li>
         <li><a href="{{url_for('routes.components')}}">Components</a></li>
         {%if current_user.is_authenticated%}
             <li><a href="{{url_for('routes.user_index')}}">Users</a></li>
             <li><a href="{{url_for('routes.items')}}">Items</a></li>
+            <li><a class="font-bold" href="{{url_for('routes.admin_users')}}">Admin</a></li>
         {%endif%}
         <li class="ml-auto">
             <div class="flex items-center">
