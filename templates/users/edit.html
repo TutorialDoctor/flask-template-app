@@ -2,12 +2,12 @@
 
 {%block content%}
 
-  <h1 class="text-4xl">Edit User &lt{{user.first_name}} {{user.last_name}}&gt</h1>
+  <h1 class="text-4xl">Edit User &lt{{object.first_name}} {{object.last_name}}&gt</h1>
 
 
-<form class="mt-4" action="{{url_for('routes.edit_user', user_id=user.id)}}" method="POST">
+<form class="mt-4" action="{{url_for('routes.resource_route', id=object.id,resource='users', action='edit')}}" method="POST">
 
-  <img class="w-32 h-32 object-cover" alt="User avatar" src="{{user.profile_img}}" />
+  <img class="w-32 h-32 object-cover" alt="User avatar" src="{{object.profile_img}}" />
 
   <div class="mt-2 grid grid-cols-4 gap-4">
 
@@ -15,7 +15,7 @@
 {% for name in names %}
 <div>
     <label for="name" class="uppercase">{{name}}</label>
-    <input type="text" name="{{name}}" value="{{user[name]}}" id="name" placeholder="http://" />
+    <input type="text" name="{{name}}" value="{{object[name]}}" id="name" placeholder="http://" />
 </div>
 {% endfor %}
 

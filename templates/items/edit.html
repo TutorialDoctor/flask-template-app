@@ -4,9 +4,10 @@
 {% block content %}
 <h1 class="text-4xl">Edit Item</h1>
 
-<form class="grid gap-2" method="POST" action="/items/{{item.id}}">
-	<input name="name" value="{{item.name}}">
-	<input name="description" value="{{item.description}}">
-    <input type="submit" value="Submit">
+<form class="grid gap-2" method="POST"
+	action="{{url_for('routes.resource_route', id=object.id,resource='items', action='edit')}}">
+	<input name="name" value="{{object.name}}">
+	<input name="description" value="{{object.description}}">
+	<input type="submit" value="Submit">
 </form>
 {% endblock %}

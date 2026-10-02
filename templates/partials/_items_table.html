@@ -19,7 +19,7 @@
 
 
                     <span class="ml-2">
-                        <a href="{{url_for('routes.items', action='new')}}">Add Item</a>
+                        <a href="{{url_for('routes.resource_route', action='new', resource='items')}}">Add Item</a>
                     </span>
                 </button>
             </div>
@@ -43,7 +43,7 @@
                     {% for item in items %}
                     <tr class="bg-neutral-primary border-b border-default">
                         <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">
-                            <a class="hover:text-gray-500" href="{{url_for('routes.items', id=item.id)}}">
+                            <a class="hover:text-gray-500" href="{{url_for('routes.resource_route', id=item.id, resource='items', action='show')}}">
                             {{item.name}}
                         </a>
                         </th>

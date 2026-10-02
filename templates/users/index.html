@@ -4,7 +4,7 @@
 
 <h1 class="text-4xl">Users</h1>
 
-{% for user in users %}
+{% for user in objects %}
 
 <div class="border rounded-lg p-4">
     <p>Name:  {{user.first_name}} {{user.last_name}}</p>
@@ -12,11 +12,11 @@
 </div>
 
 <div class="my-4">
-<a href="{{url_for('routes.show_user', user_id=user.id)}}">See</a>
+<a href="{{url_for('routes.resource_route', id=user.id, action='show', resource='users')}}">See</a>
 
-<a href="{{url_for('routes.edit_user', user_id=user.id)}}">Edit</a>
+<a href="{{url_for('routes.resource_route', id=user.id, action='edit', resource='users')}}">Edit</a>
 
-<a href="{{url_for('routes.new_user')}}">New</a>
+<a href="{{url_for('routes.resource_route', action='new', resource='users')}}">New</a>
 </div>
 
 {% endfor %}

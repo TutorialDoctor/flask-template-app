@@ -3,51 +3,51 @@
 {%block content%}
 
 
-<h1 class="text-3xl">{{user.first_name}} {{user.last_name}}</h1>
-<img class="w-32 h-32 object-cover" src="{{user.profile_img}}" alt="">
+<h1 class="text-3xl">{{object.first_name}} {{object.last_name}}</h1>
+<img class="w-32 h-32 object-cover" src="{{object.profile_img}}" alt="">
 
-{{user.profile_img}}
+{{object.profile_img}}
 
-<h1 class="text-2xl">Other users</h1>
+<h1 class="text-2xl">Other objects</h1>
 
-{% for u in similar_users %}
+{% for u in similar_objects %}
 
 <div>
 
     <img class="w-32 h-32 object-cover" src="{{u.profile_img}}" alt="">
 
-    <a href="{{url_for('routes.show_user', user_id=u.id)}}">{{u.first_name}}</a>
+    <a href="{{url_for('routes.show_object', id=u.id)}}">{{u.first_name}}</a>
 
 </div>
 
 {%endfor%}
 
-{{user.first_name}}
+{{object.first_name}}
 
-{{user.last_name}}
+{{object.last_name}}
 
-<a href="tel:{{user.phone | phone}}">{{user.phone | phone}}</a>
+<a href="tel:{{object.phone | phone}}">{{object.phone | phone}}</a>
 
-{{user.address}}
+{{object.address}}
 
-<a href="mailto:{{user.email}}">{{user.email}}</a>
+<a href="mailto:{{object.email}}">{{object.email}}</a>
 
 <h2>
     <p>Bio</p>
-    {{user.info.address}}
+    {{object.info.address}}
 </h2>
 
 <hr>
 ITEMS
-<!-- {{user_items}} -->
-{%for item in user_items%}
+<!-- {{object_items}} -->
+{%for item in object_items%}
 {{item.name}}<br />
 {{item.numeral_name}}
 {{item.numeral}}
 {%endfor%}
 
 
-<a href="{{ url_for('routes.delete_user', user_id=user.id) }}">Delete</a>
+<a href="{{ url_for('routes.resource_route', id=object.id, resource='users', action='delete') }}">Delete</a>
 
 
 

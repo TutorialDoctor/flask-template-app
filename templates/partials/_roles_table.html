@@ -19,7 +19,7 @@
 
 
                     <span class="ml-2">
-                        <a href="{{url_for('routes.roles', action='new')}}">Add Role</a>
+                        <a href="{{url_for('routes.resource_route', action='new', resource='roles')}}">Add Role</a>
                     </span>
                 </button>
             </div>
@@ -39,7 +39,7 @@
                     <tr class="bg-neutral-primary border-b border-default">
                         <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">
 
-                           <a class="hover:text-gray-500" href="{{url_for('routes.roles', id=role.id)}}">
+                           <a class="hover:text-gray-500" href="{{url_for('routes.resource_route', id=role.id, action='show', resource='roles')}}">
                             {{role.name}}
                         </a>
                   

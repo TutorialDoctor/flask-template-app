@@ -5,12 +5,12 @@
   <div class="flex justify-content-between align-items-center mb-3">
     <h1 class="text-4xl">Items</h1>
     {# Points to /items?action=new #}
-    <a href="{{ url_for('routes.items', action='new') }}" class="ml-2 btn btn-primary">
+    <a href="{{ url_for('routes.resource_route', action='new', resource='items') }}" class="ml-2 btn btn-primary">
       + Add New Item
     </a>
   </div>
 
-  {% if items %}
+  {% if objects %}
     <table class="table table-striped mt-4">
       <thead>
         <tr>
@@ -20,19 +20,19 @@
         </tr>
       </thead>
       <tbody>
-        {% for item in items %}
+        {% for item in objects %}
           <tr>
             <td>{{ item.id }}</td>
             <td>{{ item.name }}</td>
             <td class="flex gap-2">
-               <a href="{{ url_for('routes.items', id=item.id) }}" class="btn btn-sm btn-info">
+               <a href="{{ url_for('routes.resource_route', id=item.id, action='show', resource='items') }}" class="btn btn-sm btn-info">
     View
   </a>
-              <a href="{{ url_for('routes.items', id=item.id, action='edit') }}" class="btn btn-sm btn-outline-secondary">
+              <a href="{{ url_for('routes.resource_route', id=item.id, action='edit', resource='items') }}" class="btn btn-sm btn-outline-secondary">
                 Edit
               </a>
 
-              <form action="{{ url_for('routes.items', id=item.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?');">
+              <form action="{{ url_for('routes.resource_route', id=item.id, resource='items',action='delete') }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?');">
                 <input type="hidden" name="_method" value="DELETE">
                 <button type="submit" class="btn btn-sm btn-outline-danger">
                   Delete

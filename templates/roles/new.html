@@ -4,7 +4,7 @@
 {% block content %}
 <h1 class="text-4xl">New Role</h1>
 
-<form class="grid gap-4" method="POST" action="/roles">
+<form class="grid gap-4" method="POST" action="{{ url_for('routes.resource_route', resource='roles',action='new') }}" >
 	<input name="name" placeholder="name">
     <input type="submit" value="Submit">
 </form>

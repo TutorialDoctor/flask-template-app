@@ -28,7 +28,7 @@
         <aside id="sidenav" class="w-1/5">
 
             <div class="grid gap-y-4">
-                {%set navbaritems = ['users','items','photos','videos'] %}
+                {%set navbaritems = ['users','items'] %}
                 {%for item in navbaritems%}
                 <div
                     class="{{ 'bg-gray-100' if active_tab==item else '' }} p-2 rounded-md flex justify-start items-center">
@@ -39,8 +39,13 @@
                         </path>
                     </svg>
                     <div class="ml-3 col-span-10">
-                        <a class="text-xs capitalize" href="/admin/{{item}}" hx-get="/admin/{{item}}"
-                            hx-target="#main-content" hx-push-url="true">{{item}}</a>
+                        <a class="text-xs capitalize" 
+   href="{{ url_for('routes.admin_' + item) }}" 
+   hx-get="{{ url_for('routes.admin_' + item) }}"
+   hx-target="#main-content" 
+   hx-push-url="true">
+   {{ item }}
+</a>
                     </div>
                     <div class="ml-auto text-xs">
                         <p>128</p>
