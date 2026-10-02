@@ -39,7 +39,9 @@
                     <tr class="bg-neutral-primary border-b border-default">
                         <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">
 
+                           <a class="hover:text-gray-500" href="{{url_for('routes.roles', id=role.id)}}">
                             {{role.name}}
+                        </a>
                   
                         </th>
                     </tr>
