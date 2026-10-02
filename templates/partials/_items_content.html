@@ -48,7 +48,9 @@
                     {% for item in items %}
                     <tr class="bg-neutral-primary border-b border-default">
                         <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">
-                            {{ item.name }}
+                            <a class="hover:text-gray-500" href="{{url_for('routes.items', id=item.id)}}">
+                            {{item.name}}
+                        </a>
                         </th>
                         <td class="px-6 py-4">{{ item.sku or 'asd'}}</td>
                         <td class="px-6 py-4">{{ item.category or 'as'}}</td>
