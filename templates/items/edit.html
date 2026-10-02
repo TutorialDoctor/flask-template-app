@@ -13,13 +13,13 @@
     <label class="block font-bold mb-1">Assigned Users</label>
     <select name="user_ids" multiple class="border p-2 w-full h-32 rounded">
       {% for user in all_users %}
-        <option value="{{ user.id }}" {% if user.id in current_user_ids %}selected{% endif %}>
+        <option value="{{ user.id }}" {% if user.id in current_users_ids %}selected{% endif %}>
           {{ user.first_name }} {{ user.last_name }} ({{ user.email }})
         </option>
       {% endfor %}
     </select>
   </div>
-  
+
 	<input type="submit" value="Submit">
 </form>
 {% endblock %}

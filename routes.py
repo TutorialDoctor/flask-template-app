@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, abort
 from flask_login import login_user, login_required, logout_user
-from peewee import DoesNotExist
+from peewee import DoesNotExist, ForeignKeyField
 
 from models import User, UserInfo, Item, UserItem, Role, BaseModel
 from modules.BaseModule import BaseModule
@@ -11,6 +11,44 @@ from modules.PasswordGenerator import PasswordGenerator
 
 routes = Blueprint("routes", __name__, static_folder="static", template_folder="templates")
 auth = Blueprint("auth", __name__, static_folder="static", template_folder="templates")
+
+
+# --- Dynamic M2M Configuration Registry ---
+# Map resources to their M2M junction models and relationships.
+# As you add DocumentItem, UserDocument, MediaItem, etc., register them here.
+M2M_MAP = {
+    'users': [
+        {
+            'form_key': 'item_ids',
+            'junction_model': UserItem,
+            'source_field': UserItem.user,
+            'target_field': UserItem.item,
+            'context_key': 'items',
+            'target_model': Item
+        },
+        # Example for future Documents feature:
+        # {
+        #     'form_key': 'document_ids',
+        #     'junction_model': UserDocument,
+        #     'source_field': UserDocument.user,
+        #     'target_field': UserDocument.document,
+        #     'context_key': 'documents',
+        #     'target_model': Document
+        # }
+    ],
+    'items': [
+        {
+            'form_key': 'user_ids',
+            'junction_model': UserItem,
+            'source_field': UserItem.item,
+            'target_field': UserItem.user,
+            'context_key': 'users',
+            'target_model': User
+        },
+    ],
+    # Add new resources here as your app grows:
+    # 'documents': [ ... ]
+}
 
 
 # --- General Routes ---
@@ -108,11 +146,16 @@ def admin_roles():
     return _render_admin_tab('roles', Role.select(), 'partials/_roles_table.html')
 
 
-# --- Helper Functions ---
+# --- Dynamic Helper Functions ---
 
 def resolve_model(resource):
     """Maps singular/plural route resources to Peewee model classes dynamically."""
-    target_name = ''.join(word.title() for word in resource.rstrip('s').split('_'))
+    # Pluralization edge case handling (e.g. "categories" -> "Category")
+    if resource.endswith('ies'):
+        target_name = resource[:-3].title() + 'y'
+    else:
+        target_name = ''.join(word.title() for word in resource.rstrip('s').split('_'))
+
     for model in BaseModel.__subclasses__():
         if model.__name__ == target_name:
             return model
@@ -140,39 +183,58 @@ def render_action_template(resource, template_type, **context):
     return render_template(f'{resource}/{template_type}.html', resource=resource, **context)
 
 def get_m2m_context(resource, instance=None):
-    """Provides related model datasets and current IDs for multi-select rendering."""
-    if resource == 'users':
-        return {
-            'all_items': Item.select(),
-            'current_item_ids': [i.id for i in instance.items] if instance else []
-        }
-    if resource == 'items':
-        return {
-            'all_users': User.select(),
-            'current_user_ids': [u.id for u in instance.users] if instance else []
-        }
-    return {}
+    """Dynamically gathers all M2M dropdown/checkbox context configured for a resource."""
+    context = {}
+    configs = M2M_MAP.get(resource, [])
+
+    for cfg in configs:
+        target_model = cfg['target_model']
+        ctx_key = cfg['context_key']
+        
+        # All available objects (e.g., all_documents, all_items)
+        context[f"all_{ctx_key}"] = target_model.select()
+
+        # Currently attached IDs
+        if instance:
+            junction_model = cfg['junction_model']
+            source_field = cfg['source_field']
+            target_field = cfg['target_field']
+
+            query = (junction_model
+                     .select(getattr(junction_model, target_field.name))
+                     .where(source_field == instance))
+            
+            context[f"current_{ctx_key}_ids"] = [getattr(row, target_field.name).id for row in query]
+        else:
+            context[f"current_{ctx_key}_ids"] = []
+
+    return context
 
 def sync_m2m_relations(resource, instance, form_data):
-    """Performs bulk delete and bulk insert on the UserItem junction table."""
-    m2m_config = {
-        'users': ('item_ids', UserItem.user, 'item'),
-        'items': ('user_ids', UserItem.item, 'user')
-    }
+    """Performs bulk sync across all configured M2M relationships for a given resource."""
+    configs = M2M_MAP.get(resource, [])
 
-    if resource not in m2m_config:
-        return
+    for cfg in configs:
+        form_key = cfg['form_key']
+        junction_model = cfg['junction_model']
+        source_field = cfg['source_field']
+        target_field = cfg['target_field']
 
-    form_key, filter_field, target_field = m2m_config[resource]
-    selected_ids = form_data.getlist(form_key, type=int)
+        selected_ids = form_data.getlist(form_key, type=int)
 
-    # 1. Clear existing junction links
-    UserItem.delete().where(filter_field == instance).execute()
+        # 1. Clear existing junction links for this specific relationship
+        junction_model.delete().where(source_field == instance).execute()
 
-    # 2. Bulk insert new junction links
-    if selected_ids:
-        rows = [{filter_field.name: instance.id, target_field: target_id} for target_id in selected_ids]
-        UserItem.insert_many(rows).execute()
+        # 2. Bulk insert updated junction links
+        if selected_ids:
+            rows = [
+                {
+                    source_field.name: instance.id,
+                    target_field.name: selected_id
+                }
+                for selected_id in selected_ids
+            ]
+            junction_model.insert_many(rows).execute()
 
 
 # --- Authentication Routes ---

@@ -300,7 +300,8 @@ class Photo(BaseModel):
 
 
 class Images(BaseModel):
-    user = ForeignKeyField(User, backref="images", null=True)
+    user = ForeignKeyField(User, backref="images", null=True, on_delete="CASCADE")
+    item = ForeignKeyField(Item, backref="images", null=True, on_delete="CASCADE")
     title = CharField(null=True)
     description = TextField(null=True)
     url = CharField(null=True)
@@ -312,7 +313,8 @@ class Images(BaseModel):
 
 
 class Videos(BaseModel):
-    user = ForeignKeyField(User, backref="videos", null=True)
+    user = ForeignKeyField(User, backref="videos", null=True, on_delete="CASCADE")
+    item = ForeignKeyField(Item, backref="images", null=True, on_delete="CASCADE")
     title = CharField(null=True)
     description = TextField(null=True)
     url = CharField(null=True)
