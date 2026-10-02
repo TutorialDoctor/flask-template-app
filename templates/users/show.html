@@ -16,7 +16,7 @@
 
     <img class="w-32 h-32 object-cover" src="{{u.profile_img}}" alt="">
 
-    <a href="{{url_for('routes.show_object', id=u.id)}}">{{u.first_name}}</a>
+    <a href="{{url_for('routes.resource_route', id=u.id,action='show',resource='show')}}">{{u.first_name}}</a>
 
 </div>
 
@@ -44,6 +44,20 @@
     {{item.numeral_name}},
     {{item.numeral}},
     {{item.description}}
+{%endfor%}
+
+<hr>
+<h2 class="text-2xl">User Videos</h2>
+{%for video in object.videos%}
+    {{video.title}}<br />
+
+{%endfor%}
+
+<hr>
+<h2 class="text-2xl">User Photos</h2>
+{%for image in object.images%}
+    {{image.title}}<br />
+
 {%endfor%}
 
 <br />
