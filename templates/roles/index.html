@@ -5,7 +5,7 @@
   <div class="flex justify-content-between align-objects-center mb-3">
     <h1 class="text-4xl">Roles</h1>
     {# Points to /roles?action=new #}
-    <a href="{{ url_for('routes.resource_route', action='new', resource='roles') }}" class="ml-2 btn btn-primary">
+    <a href="{{ url_for('routes.crud', action='new', resource='roles') }}" class="ml-2 btn btn-primary">
       + Add New Role
     </a>
   </div>
@@ -25,14 +25,14 @@
             <td>{{ object.id }}</td>
             <td>{{ object.name }}</td>
             <td class="flex gap-2">
-               <a href="{{ url_for('routes.resource_route', id=object.id, resource='roles') }}" class="btn btn-sm btn-info">
+               <a href="{{ url_for('routes.crud', id=object.id, resource='roles') }}" class="btn btn-sm btn-info">
     View
   </a>
-              <a href="{{ url_for('routes.resource_route', id=object.id, action='edit', resource='roles') }}" class="btn btn-sm btn-outline-secondary">
+              <a href="{{ url_for('routes.crud', id=object.id, action='edit', resource='roles') }}" class="btn btn-sm btn-outline-secondary">
                 Edit
               </a>
 
-              <form action="{{ url_for('routes.resource_route', id=object.id, resource='roles') }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?');">
+              <form action="{{ url_for('routes.crud', id=object.id, resource='roles') }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?');">
                 <input type="hidden" name="_method" value="DELETE">
                 <button type="submit" class="btn btn-sm btn-outline-danger">
                   Delete

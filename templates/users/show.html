@@ -16,7 +16,7 @@
 
     <img class="w-32 h-32 object-cover" src="{{u.profile_img}}" alt="">
 
-    <a href="{{url_for('routes.resource_route', id=u.id,action='show',resource='show')}}">{{u.first_name}}</a>
+    <a href="{{url_for('routes.crud', id=u.id,action='show',resource='show')}}">{{u.first_name}}</a>
 
 </div>
 
@@ -62,6 +62,6 @@
 
 <br />
 <a class="bg-black text-white px-2 py-1"
-    href="{{ url_for('routes.resource_route', id=object.id, resource='users', action='delete') }}">Delete</a>
+    href="{{ url_for('routes.crud', id=object.id, resource='users', action='delete') }}">Delete</a>
 
 {%endblock%}

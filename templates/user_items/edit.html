@@ -1,5 +1,5 @@
 <!-- templates/user_items/new.html or edit.html -->
-<form action="{{ url_for('routes.resource_route', resource='user_items') }}" method="POST">
+<form action="{{ url_for('routes.crud', resource='user_items') }}" method="POST">
   <label>User ID</label>
   <input type="number" name="user" value="{{ object.user.id if object else '' }}">
 

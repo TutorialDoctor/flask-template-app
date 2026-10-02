@@ -5,7 +5,7 @@
 <h1 class="text-4xl">Edit Item</h1>
 
 <form class="grid gap-2" method="POST"
-	action="{{url_for('routes.resource_route', id=object.id,resource='items', action='edit')}}">
+	action="{{url_for('routes.crud', id=object.id,resource='items', action='edit')}}">
 	<input name="name" value="{{object.name}}">
 	<input name="description" value="{{object.description}}">
 

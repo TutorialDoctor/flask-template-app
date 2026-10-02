@@ -15,11 +15,9 @@ from peewee import SqliteDatabase, Model
 
 db = SqliteDatabase("data.db")
 
-
 class BaseModel(Model):
     class Meta:
         database = db
-
 
 class Role(BaseModel):
     id = AutoField()
@@ -28,7 +26,6 @@ class Role(BaseModel):
 
     class Meta:
         table_name = "roles"
-
 
 # One-To-One
 class UserInfo(BaseModel):

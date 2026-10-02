@@ -8,7 +8,7 @@
 <div class="container my-4">
   <div class="card">
     <div class="card-header d-flex justify-content-between align-objects-center">
-      <a href="{{ url_for('routes.resource_route', action='show', resource='items') }}"
+      <a href="{{ url_for('routes.crud', action='show', resource='items') }}"
         class="btn btn-outline-secondary">
         &larr; Back to Items
       </a>
@@ -32,13 +32,13 @@
 
     <div class="card-footer flex gap-2">
       {# Link to Edit mode via ?action=edit #}
-      <a href="{{ url_for('routes.resource_route', id=object.id, action='edit', resource='items') }}"
+      <a href="{{ url_for('routes.crud', id=object.id, action='edit', resource='items') }}"
         class="btn btn-warning">
         Edit
       </a>
 
       {# Delete Form #}
-      <form action="{{ url_for('routes.resource_route', id=object.id, resource='items', action='delete') }}"
+      <form action="{{ url_for('routes.crud', id=object.id, resource='items', action='delete') }}"
         method="POST" onsubmit="return confirm('Delete this object?');">
         <input type="hidden" name="_method" value="DELETE">
         <button type="submit" class="btn btn-danger">Delete</button>

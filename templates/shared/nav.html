@@ -4,9 +4,9 @@
         <li><a href="{{url_for('routes.contact')}}">Contact</a></li>
         <li><a href="{{url_for('routes.components')}}">Components</a></li>
         {%if current_user.is_authenticated%}
-            <li><a href="{{url_for('routes.resource_route', resource='users')}}">Users</a></li>
-            <li><a href="{{url_for('routes.resource_route', resource='items')}}">Items</a></li>
-            <li><a href="{{url_for('routes.resource_route', resource='roles')}}">Roles</a></li>
+            <li><a href="{{url_for('routes.crud', resource='users')}}">Users</a></li>
+            <li><a href="{{url_for('routes.crud', resource='items')}}">Items</a></li>
+            <li><a href="{{url_for('routes.crud', resource='roles')}}">Roles</a></li>
             <li><a class="font-bold" href="{{url_for('routes.admin_users')}}">Admin</a></li>
         {%endif%}
         <li class="ml-auto">

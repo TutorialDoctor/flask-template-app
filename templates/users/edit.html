@@ -5,7 +5,7 @@
   <h1 class="text-4xl">Edit User &lt{{object.first_name}} {{object.last_name}}&gt</h1>
 
 
-<form class="mt-4" action="{{url_for('routes.resource_route', id=object.id,resource='users', action='edit')}}" method="POST">
+<form class="mt-4" action="{{url_for('routes.crud', id=object.id,resource='users', action='edit')}}" method="POST">
 
   <img class="w-32 h-32 object-cover" alt="User avatar" src="{{object.profile_img}}" />
 
