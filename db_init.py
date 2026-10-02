@@ -21,7 +21,7 @@ from models import (
     Item,
     Videos,
     Images,
-    UserItems,
+    UserItem,
     UserInfo,
 )
 
@@ -44,7 +44,7 @@ TABLES = [
     Item,
     Videos,
     Images,
-    UserItems,
+    UserItem,
     UserInfo,
 ]
 
@@ -55,11 +55,11 @@ def initialize_database():
 
     with db.atomic():
         user1, _ = User.get_or_create(
-            first_name="Alice",
-            last_name="Smith",
-            email="alice@email.com",
-            password="password",
-        )
+                    first_name="Admin",
+                    last_name="Admin",
+                    email="admin@gmail.com",
+                    password="password",
+                )
         user2, _ = User.get_or_create(
             first_name="Bob",
             last_name="Henry",
@@ -67,11 +67,11 @@ def initialize_database():
             password="password",
         )
         user3, _ = User.get_or_create(
-            first_name="Admin",
-            last_name="Admin",
-            email="admin@gmail.com",
-            password="password",
-        )
+                    first_name="Alice",
+                    last_name="Smith",
+                    email="alice@email.com",
+                    password="password",
+                )
 
         # Un-comment to generate more fake users
         # fake_user = FakeUser.get_data()

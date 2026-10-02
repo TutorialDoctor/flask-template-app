@@ -38,17 +38,16 @@
 </h2>
 
 <hr>
-ITEMS
-<!-- {{object_items}} -->
-{%for item in object_items%}
-{{item.name}}<br />
-{{item.numeral_name}}
-{{item.numeral}}
+<h2 class="text-2xl">User Items</h2>
+{%for item in object.items%}
+    {{item.name}}<br />
+    {{item.numeral_name}},
+    {{item.numeral}},
+    {{item.description}}
 {%endfor%}
 
-
-<a href="{{ url_for('routes.resource_route', id=object.id, resource='users', action='delete') }}">Delete</a>
-
-
+<br />
+<a class="bg-black text-white px-2 py-1"
+    href="{{ url_for('routes.resource_route', id=object.id, resource='users', action='delete') }}">Delete</a>
 
 {%endblock%}

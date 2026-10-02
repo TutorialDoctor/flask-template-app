@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash,  abort
-from models import User,UserInfo,Item,UserItems,Role,BaseModel
+from models import User,UserInfo,Item,UserItem,Role,BaseModel
 from datetime import datetime
 from extensions import cache
 from flask_login import (
@@ -11,6 +11,8 @@ from flask_login import (
 from modules.BaseModule import BaseModule
 from modules.ScriptRunner import ScriptRunner
 from modules.PasswordGenerator import PasswordGenerator
+from peewee import DoesNotExist
+
 
 routes = Blueprint("routes", __name__, static_folder="static", template_folder="templates")
 auth = Blueprint("auth", __name__, static_folder="static", template_folder="templates")
@@ -52,10 +54,12 @@ def resource_route(resource='users', id=None, action=None):
     # --- Collection Level: /<resource> ---
     if not id:
         if action == 'new' and method == 'GET':
-            return render_action_template(resource, 'new')
+            extra_context = get_relation_context(resource)
+            return render_action_template(resource, 'new', **extra_context)
 
         if method == 'POST':
             instance = model.create(**extract_form_data(model))
+            sync_m2m_relations(resource, instance, request.form)
             return redirect(url_for('routes.resource_route', resource=resource, id=instance.id))
 
         if method == 'GET':
@@ -65,7 +69,8 @@ def resource_route(resource='users', id=None, action=None):
     instance = get_instance_or_404(model, id)
 
     if action == 'edit' and method == 'GET':
-        return render_action_template(resource, 'edit', object=instance)
+        extra_context = get_relation_context(resource, instance)
+        return render_action_template(resource, 'edit', object=instance, **extra_context)
 
     if action == 'delete' or method == 'DELETE':
         instance.delete_instance()
@@ -75,6 +80,10 @@ def resource_route(resource='users', id=None, action=None):
         for key, value in extract_form_data(model).items():
             setattr(instance, key, value)
         instance.save()
+
+        # Update M2M Junction table
+        sync_m2m_relations(resource, instance, request.form)
+
         return redirect(url_for('routes.resource_route', resource=resource, id=instance.id))
 
     if method == 'GET':
@@ -118,6 +127,35 @@ def admin_roles():
     return render_template('admin.html', active_tab='roles', roles=roles)
 
 # --- Helper Functions ---
+
+def get_relation_context(resource, instance=None):
+    """Provides related options and selected IDs to Jinja edit/new templates."""
+    context = {}
+    if resource == 'users':
+        context['all_items'] = Item.select()
+        context['current_item_ids'] = [item.id for item in instance.items] if instance else []
+    elif resource == 'items':
+        context['all_users'] = User.select()
+        context['current_user_ids'] = [user.id for user in instance.users] if instance else []
+    return context
+
+
+def sync_m2m_relations(resource, instance, form_data):
+    """Syncs the UserItem junction table when saving Users or Items."""
+    if resource == 'users':
+        selected_item_ids = form_data.getlist('item_ids', type=int)
+        # Clear existing junction entries for this user and recreate
+        UserItem.delete().where(UserItem.user == instance).execute()
+        for item_id in selected_item_ids:
+            UserItem.create(user=instance, item=item_id)
+
+    elif resource == 'items':
+        selected_user_ids = form_data.getlist('user_ids', type=int)
+        # Clear existing junction entries for this item and recreate
+        UserItem.delete().where(UserItem.item == instance).execute()
+        for user_id in selected_user_ids:
+            UserItem.create(user=user_id, item=instance)
+            
 def resolve_model(resource):
     """Maps resource names ('posts') to Peewee models ('Post')."""
     target_class = ''.join(word.title() for word in resource.rstrip('s').split('_'))
