@@ -7,12 +7,7 @@
         </p>
 
         <div class="mt-4 flex justify-between">
-            <div class="w-2/5 rounded-lg text-xs bg-gray-100 p-1 gap-x-2">
-                <button class="inline-block shadow-sm p-1 bg-white rounded-md" role="tab">All Users</button>
-                <button class="inline-block ml-4 p-1 text-gray-500 rounded-md" role="tab">Roles</button>
-                <button class="inline-block ml-4 p-1 text-gray-500 rounded-md" role="tab">Permission</button>
-
-            </div>
+            {% include 'partials/tabs.html' %}
             <button class="text-center text-xs bg-black text-white px-4 py-2 rounded-lg flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor"
                     class="bi bi-plus-circle" viewBox="0 0 16 16">

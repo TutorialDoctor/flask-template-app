@@ -3,6 +3,17 @@
 - [ ] Add bcrypt and argon
 - [ ] Complete Component Library
 
+
+**Start the App**
+
+`uv run main.py`
+
+
+**Seed the database**
+
+`python3 -m scripts.seed`
+
+
 # File Structure
 
 ```
@@ -20,12 +31,6 @@ requirements.txt
 data.db
 ```
 
-`python3 app.py`
-
-
-
 <!-- {% with user=current_user %}
-
   {% include './shared/nav.html' %}
-
 {% endwith %} -->

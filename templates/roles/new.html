@@ -1,0 +1,11 @@
+{% extends 'shared/layout.html' %}
+
+
+{% block content %}
+<h1 class="text-4xl">New Role</h1>
+
+<form class="grid gap-4" method="POST" action="/roles">
+	<input name="name" placeholder="name">
+    <input type="submit" value="Submit">
+</form>
+{% endblock %}

@@ -2,17 +2,12 @@
     <!-- Center Section: Title and Item Table -->
     <div class="w-full">
         <div>
-             <p class="font-medium text-2xl">Items</p>
+             <p class="font-medium text-2xl">Roles</p>
             <p class="text-gray-500" style="font-size: .75rem">Manager your account settings and set e-mail preferences.
             </p>
 
             <div class="mt-4 flex justify-between">
-                <div class="w-2/5 rounded-lg text-xs bg-gray-100 p-1 gap-x-2">
-                    <button class="inline-block shadow-sm p-1 bg-white rounded-md" role="tab">All Items</button>
-                    <button class="inline-block ml-4 p-1 text-gray-500 rounded-md" role="tab">Roles</button>
-                    <button class="inline-block ml-4 p-1 text-gray-500 rounded-md" role="tab">Permission</button>
-
-                </div>
+               {% include 'partials/tabs.html' %}
                 <button class="text-center text-xs bg-black text-white px-4 py-2 rounded-lg flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor"
                         class="bi bi-plus-circle" viewBox="0 0 16 16">
@@ -24,7 +19,7 @@
 
 
                     <span class="ml-2">
-                        <a href="{{url_for('routes.items', action='new')}}">Add Item</a>
+                        <a href="{{url_for('routes.roles', action='new')}}">Add Role</a>
                     </span>
                 </button>
             </div>
@@ -36,29 +31,17 @@
             <table class="w-full text-sm text-left rtl:text-right text-body">
                 <thead class="text-sm text-body bg-neutral-secondary-soft border-b rounded-base border-default">
                     <tr class="bg-gray-50">
-                        <th scope="col" class="px-6 py-3 font-medium">Item Name</th>
-                        <th scope="col" class="px-6 py-3 font-medium">SKU</th>
-                        <th scope="col" class="px-6 py-3 font-medium">Category</th>
-                        <th scope="col" class="px-6 py-3 font-medium">Stock</th>
-                        <th scope="col" class="px-6 py-3 font-medium">Price</th>
-                        <th scope="col" class="px-6 py-3 font-medium">Status</th>
+                        <th scope="col" class="px-6 py-3 font-medium">Role Name</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for item in items %}
+                    {% for role in roles %}
                     <tr class="bg-neutral-primary border-b border-default">
                         <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">
-                            <a class="hover:text-gray-500" href="{{url_for('routes.items', id=item.id)}}">
-                            {{item.name}}
-                        </a>
+
+                            {{role.name}}
+                  
                         </th>
-                        <td class="px-6 py-4">{{ item.sku or 'asd'}}</td>
-                        <td class="px-6 py-4">{{ item.category or 'as'}}</td>
-                        <td class="px-6 py-4">{{ item.stock or 'yes'}}</td>
-                        <td class="px-6 py-4">${{ item.price or '123'}}</td>
-                        <td class="px-6 py-4">
-                            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Active</span>
-                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

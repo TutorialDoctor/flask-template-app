@@ -1,0 +1,87 @@
+<div>
+    <!-- Center Section: Title and Item Table -->
+    <div class="w-full">
+        <div>
+             <p class="font-medium text-2xl">Items</p>
+            <p class="text-gray-500" style="font-size: .75rem">Manager your account settings and set e-mail preferences.
+            </p>
+
+            <div class="mt-4 flex justify-between">
+                {% include 'partials/tabs.html' %}
+                <button class="text-center text-xs bg-black text-white px-4 py-2 rounded-lg flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor"
+                        class="bi bi-plus-circle" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"></path>
+                        <path
+                            d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4">
+                        </path>
+                    </svg>
+
+
+                    <span class="ml-2">
+                        <a href="{{url_for('routes.items', action='new')}}">Add Item</a>
+                    </span>
+                </button>
+            </div>
+
+            <hr class="mt-4">
+        </div>
+
+        <div class="relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default h-[800px]">
+            <table class="w-full text-sm text-left rtl:text-right text-body">
+                <thead class="text-sm text-body bg-neutral-secondary-soft border-b rounded-base border-default">
+                    <tr class="bg-gray-50">
+                        <th scope="col" class="px-6 py-3 font-medium">Item Name</th>
+                        <th scope="col" class="px-6 py-3 font-medium">SKU</th>
+                        <th scope="col" class="px-6 py-3 font-medium">Category</th>
+                        <th scope="col" class="px-6 py-3 font-medium">Stock</th>
+                        <th scope="col" class="px-6 py-3 font-medium">Price</th>
+                        <th scope="col" class="px-6 py-3 font-medium">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr class="bg-neutral-primary border-b border-default">
+                        <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">
+                            <a class="hover:text-gray-500" href="{{url_for('routes.items', id=item.id)}}">
+                            {{item.name}}
+                        </a>
+                        </th>
+                        <td class="px-6 py-4">{{ item.sku or 'asd'}}</td>
+                        <td class="px-6 py-4">{{ item.category or 'as'}}</td>
+                        <td class="px-6 py-4">{{ item.stock or 'yes'}}</td>
+                        <td class="px-6 py-4">${{ item.price or '123'}}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Active</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Right-Hand Side Form: Create Item -->
+    <div class="hidden col-span-12 lg:col-span-3 border border-default rounded-base p-5 bg-neutral-primary h-fit">
+        <h2 class="font-bold text-lg text-heading">Create Item</h2>
+        <p class="text-xs text-body mb-4">Add a new item to inventory.</p>
+
+        <form action="/admin/items/create" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-xs font-medium text-heading mb-1">Item Name</label>
+                <input type="text" name="name" placeholder="Enter item name" class="w-full text-xs p-2.5 border border-default rounded-base bg-transparent">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-heading mb-1">Category</label>
+                <input type="text" name="category" placeholder="Enter category" class="w-full text-xs p-2.5 border border-default rounded-base bg-transparent">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-heading mb-1">Price</label>
+                <input type="number" name="price" step="0.01" placeholder="0.00" class="w-full text-xs p-2.5 border border-default rounded-base bg-transparent">
+            </div>
+            <button type="submit" class="w-full py-2 bg-black text-white text-xs rounded-base font-medium mt-4">
+                Save Item
+            </button>
+        </form>
+    </div>
+</div>

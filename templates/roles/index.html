@@ -1,0 +1,50 @@
+{% extends "shared/layout.html" %}
+
+{% block content %}
+<div class="container my-4">
+  <div class="flex justify-content-between align-roles-center mb-3">
+    <h1 class="text-4xl">Roles</h1>
+    {# Points to /roles?action=new #}
+    <a href="{{ url_for('routes.roles', action='new') }}" class="ml-2 btn btn-primary">
+      + Add New Role
+    </a>
+  </div>
+
+  {% if roles %}
+    <table class="table table-striped mt-4">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for role in roles %}
+          <tr>
+            <td>{{ role.id }}</td>
+            <td>{{ role.name }}</td>
+            <td class="flex gap-2">
+               <a href="{{ url_for('routes.roles', id=role.id) }}" class="btn btn-sm btn-info">
+    View
+  </a>
+              <a href="{{ url_for('routes.roles', id=role.id, action='edit') }}" class="btn btn-sm btn-outline-secondary">
+                Edit
+              </a>
+
+              <form action="{{ url_for('routes.roles', id=role.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?');">
+                <input type="hidden" name="_method" value="DELETE">
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No roles found.</p>
+  {% endif %}
+</div>
+{% endblock %}

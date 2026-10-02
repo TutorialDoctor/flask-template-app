@@ -29,8 +29,6 @@
 
             <div class="grid gap-y-4">
                 {%set navbaritems = ['users','items','photos','videos'] %}
-
-
                 {%for item in navbaritems%}
                 <div
                     class="{{ 'bg-gray-100' if active_tab==item else '' }} p-2 rounded-md flex justify-start items-center">
@@ -79,9 +77,11 @@
 
             <main id="main-content">
                 {% if active_tab == 'items' %}
-                {% include 'partials/_items_content.html' %}
+                {% include 'partials/_items_table.html' %}
+                {% elif active_tab == 'roles' %}
+                {% include 'partials/_roles_table.html' %}
                 {% else %}
-                {% include 'partials/_users_content.html' %}
+                {% include 'partials/_users_table.html' %}
                 {% endif %}
             </main>
 

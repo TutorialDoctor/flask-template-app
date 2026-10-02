@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from models import User,UserInfo,Item,UserItems
+from models import User,UserInfo,Item,UserItems,Role
 from datetime import datetime
 from extensions import cache
 from flask_login import (
@@ -36,7 +36,7 @@ def admin_users():
             )
     # If request comes from HTMX, return ONLY the partial content
     if request.headers.get('HX-Request'):
-        return render_template('partials/_users_content.html', users=users)
+        return render_template('partials/_users_table.html', users=users)
         
     # Otherwise render full page layout
     return render_template('admin.html', active_tab='users', users=users)
@@ -46,10 +46,19 @@ def admin_items():
     items = Item.select().order_by(Item.created_at.desc())
     
     if request.headers.get('HX-Request'):
-        return render_template('partials/_items_content.html', items=items)
+        return render_template('partials/_items_table.html', items=items)
         
     return render_template('admin.html', active_tab='items', items=items)
+
+@routes.route('/admin/roles')
+def admin_roles():
+    roles = Role.select()
     
+    if request.headers.get('HX-Request'):
+        return render_template('partials/_roles_table.html', roles=roles)
+        
+    return render_template('admin.html', active_tab='roles', roles=roles)
+
 # General routes
 @routes.route("/ping", methods=["GET"])
 def ping():
@@ -231,6 +240,48 @@ def items(id):
         flash('Item deleted successfully!')
         return redirect(url_for('routes.items'))
 
+# ITEMS
+@routes.route('/roles', defaults={'id': None}, methods=['GET', 'POST'])
+@routes.route('/roles/<int:id>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def roles(id):
+    method = request.form.get('_method', request.method).upper()
+
+    if id is None:
+        if method == 'GET':
+            if request.args.get('action') == 'new':
+                return render_template('roles/new.html')
+            
+            roles = Role.select()
+            return render_template('roles/index.html', roles=roles)
+
+        if method == 'POST':
+            Role.create(**request.form.to_dict())
+            flash('Role created successfully!')
+            return redirect(url_for('routes.roles'))
+
+    role = Role.get_or_none(Role.id == id)
+
+    if not role:
+        return render_template('shared/404.html'), 404
+
+    if method == 'GET':
+        if request.args.get('action') == 'edit':
+            return render_template('roles/edit.html', role=role)
+        return render_template('roles/show.html', role=role)
+
+    if method in ['POST', 'PUT']:
+        for key, value in request.form.roles():
+            if key != '_method':
+                setattr(role, key, value)
+        role.save()
+        flash('Role updated successfully!')
+        return redirect(url_for('routes.roles', id=role.id))
+
+    if method == 'DELETE':
+        role.delete_instance(recursive=True)
+        flash('Role deleted successfully!')
+        return redirect(url_for('routes.roles'))
+    
 # Authentication
 @auth.route("/login", methods=["POST", "GET"])
 def login():
