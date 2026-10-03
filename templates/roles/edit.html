@@ -4,8 +4,8 @@
 {% block content %}
 <h1 class="text-4xl">Edit Role</h1>
 
-<form class="grid gap-2" method="POST" action="/roles/{{role.id}}">
-	<input name="name" value="{{role.name}}">
+<form class="grid gap-2" method="POST" action="{{ url_for('routes.crud', id=object.id, resource='roles',action='edit') }}" >
+	<input name="name" value="{{object.name}}">
     <input type="submit" value="Submit">
 </form>
 {% endblock %}

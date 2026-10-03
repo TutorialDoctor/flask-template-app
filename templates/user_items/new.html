@@ -1,0 +1,10 @@
+<!-- templates/user_items/new.html or edit.html -->
+<form action="{{ url_for('routes.crud', resource='user_items') }}" method="POST">
+  <label>User ID</label>
+  <input type="number" name="user" value="{{ object.user.id if object else '' }}">
+
+  <label>Item ID</label>
+  <input type="number" name="item" value="{{ object.item.id if object else '' }}">
+
+  <button type="submit">Save Junction Record</button>
+</form>

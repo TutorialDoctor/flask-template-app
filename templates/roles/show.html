@@ -7,23 +7,23 @@
 
 <div class="container my-4">
   <div class="card">
-    <div class="card-header d-flex justify-content-between align-roles-center">
-      <a href="{{ url_for('routes.roles') }}" class="btn btn-outline-secondary">
+    <div class="card-header d-flex justify-content-between align-objects-center">
+      <a href="{{ url_for('routes.crud',resource='roles') }}" class="btn btn-outline-secondary">
         &larr; Back to Roles
       </a>
-      <h2 class="mt-4">Role Details #{{ role.id }}</h2>
+      <h2 class="mt-4">Role Details #{{ object.id }}</h2>
     </div>
     <div class="card-body">
-      <h3 class="card-title">{{ role.name }}</h3>
+      <h3 class="card-title">{{ object.name }}</h3>
     </div>
     <div class="card-footer flex gap-2">
       {# Link to Edit mode via ?action=edit #}
-      <a href="{{ url_for('routes.roles', id=role.id, action='edit') }}" class="btn btn-warning">
+      <a href="{{ url_for('routes.crud', id=object.id, action='edit', resource='roles') }}" class="btn btn-warning">
         Edit
       </a>
 
       {# Delete Form #}
-      <form action="{{ url_for('routes.roles', id=role.id) }}" method="POST" onsubmit="return confirm('Delete this role?');">
+      <form action="{{ url_for('routes.crud', id=object.id, action='delete', resource='roles') }}" method="POST" onsubmit="return confirm('Delete this role?');">
         <input type="hidden" name="_method" value="DELETE">
         <button type="submit" class="btn btn-danger">Delete</button>
       </form>

@@ -2,25 +2,34 @@
 
 {%block content%}
 
-  <h1 class="text-4xl">Edit User &lt{{user.first_name}} {{user.last_name}}&gt</h1>
+<h1 class="text-4xl">Edit User &lt{{object.first_name}} {{object.last_name}}&gt</h1>
 
 
-<form class="mt-4" action="{{url_for('routes.edit_user', user_id=user.id)}}" method="POST">
+<form class="mt-4" action="{{url_for('routes.crud', id=object.id,resource='users', action='edit')}}" method="POST">
 
-  <img class="w-32 h-32 object-cover" alt="User avatar" src="{{user.profile_img}}" />
+  <img class="w-32 h-32 object-cover" alt="User avatar" src="{{object.profile_img}}" />
 
-  <div class="mt-2 grid grid-cols-4 gap-4">
+  <div class="mt-2">
 
-{% set names= ['email','profile_img','first_name','last_name','phone','address','password']%}
-{% for name in names %}
-<div>
-    <label for="name" class="uppercase">{{name}}</label>
-    <input type="text" name="{{name}}" value="{{user[name]}}" id="name" placeholder="http://" />
-</div>
-{% endfor %}
+    {% set names= ['email','profile_img','first_name','last_name','phone','address','password']%}
+    {% for name in names %}
+    <div>
+      <label for="name" class="uppercase">{{name}}</label>
+      <input type="text" name="{{name}}" value="{{object[name]}}" id="name" placeholder="http://" />
+    </div>
+    {% endfor %}
 
-  <input
-    type="submit" placeholder="Update" />
+    <div class="mt-4">
+      <label class="block font-bold mb-1">Assigned Items</label>
+      <select name="item_ids" multiple class="border p-2 w-full h-32 rounded">
+        {% for item in all_items %}
+        <option value="{{ item.id }}" {% if item.id in current_items_ids %}selected{% endif %}>
+          {{ item.name }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <input type="submit" placeholder="Update" />
   </div>
 
 </form>

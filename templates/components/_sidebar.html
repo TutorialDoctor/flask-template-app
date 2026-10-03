@@ -1,0 +1,16 @@
+<nav class="text-xs py-2 px-4 mr-4  empty rounded-lg border border-gray-300 shadow-md">
+    <ul class="grid gap-y-4 mt-4">
+        {%if current_user.is_authenticated%}
+            <li><a class="font-bold" href="{{url_for('routes.admin_users')}}">Admin</a></li>
+            <li><a href="{{url_for('routes.crud', resource='users')}}">Users</a></li>
+            <li><a href="{{url_for('routes.crud', resource='items')}}">Items</a></li>
+            <li><a href="{{url_for('routes.crud', resource='roles')}}">Roles</a></li>
+        {%endif%}
+        <hr/>
+         <li><a href="{{url_for('routes.settings')}}">Settings</a></li>
+        <li><a href="{{url_for('routes.home')}}">Home</a></li>
+        <li><a href="{{url_for('routes.contact')}}">Contact</a></li>
+        <li><a href="{{url_for('routes.components')}}">Components</a></li>
+        <li><a href="{{url_for('auth.logout')}}">Logout</a></li>
+    </ul>
+</nav>

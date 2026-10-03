@@ -7,13 +7,13 @@ from peewee import (
     CompositeKey,
     TextField,
     BlobField,
-    IntegerField
+    IntegerField,
+    BigIntegerField
 )
 from datetime import datetime
 from flask_login import UserMixin
-from peewee import SqliteDatabase, Model
-
-db = SqliteDatabase("data.db")
+from peewee import Model
+from extensions import db
 
 class BaseModel(Model):
     class Meta:
@@ -29,24 +29,24 @@ class Role(BaseModel):
 
 # One-To-One
 class UserInfo(BaseModel):
-        address = CharField(null=True)
-        images_path = CharField(null=True)
-        videos_path = CharField(null=True)
-        system_prompt = CharField(null=True)
-        profile_photo = CharField(null=True)
-        gallery = CharField(null=True)
-        bio = CharField(null=True)
-        occupation = CharField(null=True)
-        state= CharField(null=True)
-        city= CharField(null=True)
-        family_members = CharField(null=True)
-        friends = CharField(null=True)
-        website = CharField(null=True)
-        weight = IntegerField(null=True)
-        height = IntegerField(null=True)
+    address = CharField(null=True)
+    images_path = CharField(null=True)
+    videos_path = CharField(null=True)
+    system_prompt = CharField(null=True)
+    profile_photo = CharField(null=True)
+    gallery = CharField(null=True)
+    bio = CharField(null=True)
+    occupation = CharField(null=True)
+    state = CharField(null=True)
+    city = CharField(null=True)
+    family_members = CharField(null=True)
+    friends = CharField(null=True)
+    website = CharField(null=True)
+    weight = IntegerField(null=True)
+    height = IntegerField(null=True)
 
-        class Meta:
-            table_name = 'user_info'
+    class Meta:
+        table_name = "user_info"
 
 class User(UserMixin, BaseModel):
     id = AutoField()
@@ -79,34 +79,64 @@ class User(UserMixin, BaseModel):
     browser = CharField(max_length=255, null=True)
     forum_id = IntegerField(null=True)
     status = IntegerField(null=True)
-    info = ForeignKeyField(UserInfo, backref='user',null=True)
+    info = ForeignKeyField(UserInfo, backref="user", null=True)
 
     created_at = DateTimeField(default=datetime.now)
     updated_at = DateTimeField(default=datetime.now)
+
+    @property
+    def items(self):
+        return Item.select().join(UserItem).where(UserItem.user == self)
 
     class Meta:
         table_name = "users"
 
 # One-To-Many
 class Item(BaseModel):
-    user = ForeignKeyField(User, backref='items',null=True)
     name = CharField(null=True)
     numeral = IntegerField(null=True)
-    numeral_name = CharField(null=True)  #cost, count, price
+    numeral_name = CharField(null=True)  # cost, count, price
     description = CharField(null=True)
     image_url = CharField(null=True)
     item_type = CharField(null=True)
     created_at = DateTimeField(default=datetime.now)
     updated_at = DateTimeField(default=datetime.now)
-    class Meta:
-            table_name = 'items'
 
+    @property
+    def users(self):
+        return User.select().join(UserItem).where(UserItem.item == self)
+
+    class Meta:
+        table_name = "items"
+
+class Media(BaseModel):
+    # TODO: Replace Image,Video etc with this eventually
+    item = ForeignKeyField(Item, backref="media", null=True)
+    filename = CharField()
+    original_filename = CharField(null=True)
+    path = CharField()
+
+    mime_type = CharField(null=True)
+    extension = CharField(null=True)
+
+    size = BigIntegerField(null=True)
+
+    created_at = DateTimeField(default=datetime.now)
+
+    def __str__(self):
+        return self.filename
+    
 # Many-To-Many
-class UserItems(BaseModel):
-        user = ForeignKeyField(User, backref='user_items',null=True)
-        item = ForeignKeyField(Item, backref='user_items',null=True)
-        class Meta:
-            table_name = 'user_items'
+class UserItem(BaseModel):
+    user = ForeignKeyField(
+        User, backref="user_links", null=True, on_delete="CASCADE"
+    )
+    item = ForeignKeyField(
+        Item, backref="item_links", null=True, on_delete="CASCADE"
+    )
+
+    class Meta:
+        table_name = "user_items"
 
 class Moderator(BaseModel):
     moderator_id = AutoField()
@@ -146,12 +176,14 @@ class Administrator(BaseModel):
     class Meta:
         table_name = "administrator"
 
+
 class Interest(BaseModel):
     id = AutoField()
     description = CharField(max_length=255, null=True)
 
     class Meta:
         table_name = "interests"
+
 
 class Forum(BaseModel):
     id = AutoField()
@@ -161,6 +193,7 @@ class Forum(BaseModel):
 
     class Meta:
         table_name = "forums"
+
 
 class Post(BaseModel):
     id = AutoField()
@@ -187,6 +220,7 @@ class Post(BaseModel):
     class Meta:
         table_name = "posts"
 
+
 class Group(BaseModel):
     id = AutoField()
     title = CharField(max_length=80, null=True)
@@ -208,6 +242,7 @@ class Group(BaseModel):
 
     class Meta:
         table_name = "groups"
+
 
 class GroupMembership(BaseModel):
     id = AutoField()
@@ -272,25 +307,33 @@ class Photo(BaseModel):
     class Meta:
         table_name = "photos"
 
-class Images(BaseModel):
-    user = ForeignKeyField(User, backref='images',null=True)
-    title = CharField(null=True)
-    description = TextField(null=True)
-    url = CharField(null=True)
-    data = BlobField(null=True)
-    extension = CharField(null=True)
-    class Meta:
-            table_name = 'images'
 
-class Videos(BaseModel):
-    user = ForeignKeyField(User, backref='videos',null=True)
+class Image(BaseModel):
+    user = ForeignKeyField(User, backref="images", null=True, on_delete="CASCADE")
+    item = ForeignKeyField(Item, backref="images", null=True, on_delete="CASCADE")
     title = CharField(null=True)
+    filename = CharField(null=True)
     description = TextField(null=True)
     url = CharField(null=True)
     data = BlobField(null=True)
     extension = CharField(null=True)
+
     class Meta:
-            table_name = 'videos'
+        table_name = "images"
+
+
+class Video(BaseModel):
+    user = ForeignKeyField(User, backref="videos", null=True, on_delete="CASCADE")
+    item = ForeignKeyField(Item, backref="videos", null=True, on_delete="CASCADE")
+    title = CharField(null=True)
+    filename = CharField(null=True)
+    description = TextField(null=True)
+    url = CharField(null=True)
+    data = BlobField(null=True)
+    extension = CharField(null=True)
+
+    class Meta:
+        table_name = "videos"
 
 
 class Comment(BaseModel):
@@ -335,9 +378,8 @@ class Friendship(BaseModel):
 
     class Meta:
         table_name = "friends"
-        indexes = (
-            (("friender", "friendee"), True),
-        )
+        indexes = ((("friender", "friendee"), True),)
+
 
 class PostLike(BaseModel):
     post = ForeignKeyField(

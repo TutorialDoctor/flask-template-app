@@ -2,49 +2,42 @@
 
 {% block content %}
 <div class="container my-4">
-  <div class="flex justify-content-between align-roles-center mb-3">
+  <div class="flex justify-content-between align-objects-center mb-3">
     <h1 class="text-4xl">Roles</h1>
     {# Points to /roles?action=new #}
-    <a href="{{ url_for('routes.roles', action='new') }}" class="ml-2 btn btn-primary">
+    <a href="{{ url_for('routes.crud', action='new', resource='roles') }}" class="ml-2 btn btn-primary">
       + Add New Role
     </a>
   </div>
 
-  {% if roles %}
-    <table class="table table-striped mt-4">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for role in roles %}
-          <tr>
-            <td>{{ role.id }}</td>
-            <td>{{ role.name }}</td>
-            <td class="flex gap-2">
-               <a href="{{ url_for('routes.roles', id=role.id) }}" class="btn btn-sm btn-info">
-    View
-  </a>
-              <a href="{{ url_for('routes.roles', id=role.id, action='edit') }}" class="btn btn-sm btn-outline-secondary">
-                Edit
-              </a>
+  {% if objects %}
 
-              <form action="{{ url_for('routes.roles', id=role.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?');">
-                <input type="hidden" name="_method" value="DELETE">
-                <button type="submit" class="btn btn-sm btn-outline-danger">
-                  Delete
-                </button>
-              </form>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  {% for object in objects %}
+  <p>
+    {{object.name}}
+  </p>
+  <div class="flex gap-x-4">
+    <a href="{{ url_for('routes.crud', id=object.id, resource='roles') }}" class="btn btn-sm btn-info">
+      View
+    </a>
+    <a href="{{ url_for('routes.crud', id=object.id, action='edit', resource='roles') }}"
+      class="btn btn-sm btn-outline-secondary">
+      Edit
+    </a>
+
+    <form action="{{ url_for('routes.crud', id=object.id, resource='roles') }}" method="POST" class="d-inline"
+      onsubmit="return confirm('Are you sure?');">
+      <input type="hidden" name="_method" value="DELETE">
+      <button type="submit" class="btn btn-sm btn-outline-danger">
+        Delete
+      </button>
+    </form>
+  </div>
+  <hr class="my-4" />
+  {% endfor %}
+
   {% else %}
-    <p>No roles found.</p>
+  <p>No roles found.</p>
   {% endif %}
 </div>
 {% endblock %}

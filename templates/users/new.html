@@ -2,7 +2,7 @@
 
 {%block content%}
 
-<form action="{{url_for('routes.create_user')}}" method="POST">
+<form action="{{url_for('routes.crud', resource='users', action='create')}}" method="POST">
 
     <h1 class="text-4xl">New User</h1>
 
@@ -13,8 +13,8 @@
 <div class="grid grid-cols-4 gap-4">
 {% for name in names %}
 <div>
-    <label for="name" class="uppercase">{{name}}</label>
-    <input type="text" name="name" id="name" placeholder="{{name}}" />
+    <label for="{{name}}" class="uppercase">{{name}}</label>
+    <input type="text" name="{{name}}" id="{{name}}" placeholder="{{name}}" />
 </div>
 {% endfor %}
 

@@ -1,69 +1,116 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
-from models import User,UserInfo,Item,UserItems,Role
 from datetime import datetime
-from extensions import cache
-from flask_login import (
-    login_user,
-    login_required,
-    logout_user,
-)
-
+from flask import Blueprint, render_template, request, redirect, url_for, abort
+from flask_login import login_user, login_required, logout_user
+from peewee import DoesNotExist
+from models import User, Item, UserItem, Role, BaseModel, Image
 from modules.BaseModule import BaseModule
 from modules.ScriptRunner import ScriptRunner
 from modules.PasswordGenerator import PasswordGenerator
+from extensions import app
+import os
+from werkzeug.utils import secure_filename
 
-routes = Blueprint("routes", __name__, static_folder="static", template_folder="templates")
-auth = Blueprint("auth", __name__, static_folder="static", template_folder="templates")
+routes = Blueprint(
+    "routes",
+    __name__,
+    static_folder="static",
+    template_folder="templates"
+)
 
-# General routes
-# @routes.route("/admin", methods=["GET"])
-# def admin():
-#     users = (
-#             User
-#             .select()
-#             .order_by(User.created_at.desc())
-#         )
-#     return render_template("admin.html", users=users)
+auth = Blueprint(
+    "auth",
+    __name__,
+    static_folder="static",
+    template_folder="templates"
+)
 
-# Full Page Route (Initial Load)
-@routes.route('/admin')
-@routes.route('/admin/users')
-def admin_users():
-    users = (
-                User
-                .select()
-                .order_by(User.created_at.desc())
-            )
-    # If request comes from HTMX, return ONLY the partial content
-    if request.headers.get('HX-Request'):
-        return render_template('partials/_users_table.html', users=users)
-        
-    # Otherwise render full page layout
-    return render_template('admin.html', active_tab='users', users=users)
+RELATIONSHIPS = {
+    "users": [
+        {
+            "form_key": "item_ids",
+            "junction": UserItem,
+            "parent": UserItem.user,
+            "child": UserItem.item,
+            "context": "items",
+            "model": Item,
+        }
+    ],
 
-@routes.route('/admin/items')
-def admin_items():
-    items = Item.select().order_by(Item.created_at.desc())
+    "items": [
+        {
+            "form_key": "user_ids",
+            "junction": UserItem,
+            "parent": UserItem.item,
+            "child": UserItem.user,
+            "context": "users",
+            "model": User,
+        }
+    ],
+}
+
+@routes.route('/file-upload', methods=['GET', 'POST'])
+@login_required
+def upload():
+    if request.method == "GET":
+        items = Item.select()
+        return render_template("upload.html", items=items)
     
-    if request.headers.get('HX-Request'):
-        return render_template('partials/_items_table.html', items=items)
-        
-    return render_template('admin.html', active_tab='items', items=items)
-
-@routes.route('/admin/roles')
-def admin_roles():
-    roles = Role.select()
+    item_id = request.form.get('item_id')
+    item = Item.get_by_id(item_id)
     
-    if request.headers.get('HX-Request'):
-        return render_template('partials/_roles_table.html', roles=roles)
-        
-    return render_template('admin.html', active_tab='roles', roles=roles)
+    files = request.files.getlist('files')
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    
+    for file in files:
+        if file.filename == '':
+            continue
+            
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        Image.create(url=filename, item=item)
 
-# General routes
+    return redirect(url_for('routes.upload'))
+
+import os
+from flask import flash, redirect, request, url_for
+
+@routes.route('/image/<int:image_id>/delete', methods=['POST'])
+@login_required
+def delete_image(image_id):
+    # 1. Fetch the image record or 404
+    image = Image.get_or_none(Image.id == image_id)
+    if not image:
+        flash("Image not found.", "error")
+        return redirect(request.referrer or url_for('routes.index'))
+    
+    # Save the item ID so you can redirect back to the item page later
+    item_id = image.item_id 
+
+    # 2. Delete the file from the filesystem if it exists
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], image.url)
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+    # 3. Delete the record from the Peewee database
+    image.delete_instance()
+
+    flash("Image deleted successfully.", "success")
+    return redirect(url_for('routes.crud', id=item_id, action='show', resource='items'))
+
+# General Routes
+
 @routes.route("/ping", methods=["GET"])
 def ping():
-    password = PasswordGenerator.generate_passwords(includes=['tutorial','doctor','github','2026'])
-    return "PONG \n" + ScriptRunner.run_python('test.py')  + BaseModule.name + "\nPassword: \n" + password
+    password = PasswordGenerator.generate_passwords(
+        includes=["tutorial", "doctor", "github", "2026"]
+    )
+
+    return (
+        f"PONG \n"
+        f"{ScriptRunner.run_python('test.py')}"
+        f"{BaseModule.name}\n"
+        f"Password: \n{password}"
+    )
 
 @routes.route("/components", methods=["GET"])
 def components():
@@ -79,269 +126,366 @@ def home():
 def about():
     return render_template("about.html")
 
-
 @routes.route("/contact", methods=["GET"])
 def contact():
     return render_template("contact.html")
 
+@routes.route("/settings", methods=["GET"])
+def settings():
+    return render_template("settings.html")
 
-# CREATE - USER
-@routes.route("/users/new", methods=["GET"])
-@login_required
-def new_user():
-    return render_template("users/new.html")
 
-@routes.route("/users/create", methods=["GET", "POST"])
-@login_required
-def create_user():
-    if request.method == "GET":
-        return render_template("users/new.html")
+# Dynamic CRUD
 
-    email = request.form["email"]
-    first_name = request.form["first_name"]
-    last_name = request.form["last_name"]
-    phone = request.form["phone"]
-    address = request.form["address"]
+@routes.route("/<resource>", methods=["GET", "POST"])
+@routes.route("/<resource>/<action>", methods=["GET", "POST"])
+@routes.route("/<resource>/<int:id>", methods=["GET", "PUT", "DELETE"])
+@routes.route("/<resource>/<int:id>/<action>", methods=["GET", "POST"])
+def crud(resource="users", id=None, action=None):
+    model = get_model(resource)
 
-    profile_img = (
-        request.form["profile_img"]
-        or "https://thispersondoesnotexist.com/image"
-    )
+    if id is None:
+        return handle_collection(model, resource, action)
 
-    user = User.create(
-        email=email,
-        first_name=first_name,
-        last_name=last_name,
-        phone=phone,
-        address=address,
-        profile_img=profile_img,
-    )
+    record = get_record(model, id)
 
-    return render_template("users/show.html", user=user)
+    return handle_record(model, resource, record, action)
 
-@routes.route("/users", methods=["GET"])
-@login_required
-def user_index():
-    users = (
-        User
-        .select()
-        .order_by(User.created_at.desc())
-    )
-
-    return render_template("users/index.html", users=users)
-
-# RETRIEVE - USER
-@routes.route("/users/<int:user_id>", methods=["GET"])
-@login_required
-@cache.cached(timeout=50)
-def show_user(user_id):
-    user = User.get_or_none(User.id == user_id)
-
-    if user:
-        similar_users = User.select().limit(4).execute()
-
-        user_items = (Item
-              .select()
-              .join(UserItems)
-              .where(UserItems.user == user))
-
-        return render_template(
-            "users/show.html",
-            user=user,
-            similar_users=similar_users,
-            user_items=user_items
+def handle_collection(model, resource, action):
+    if action == "new" and request.method == "GET":
+        return render_resource(
+            resource,
+            "new",
+            **relationship_context(resource)
         )
 
-    return render_template("shared/404.html"), 404
-
-# UPDATE - USER
-@routes.route("/users/<int:user_id>/edit", methods=["GET", "POST"])
-@login_required
-def edit_user(user_id):
-    user = User.get_or_none(User.id == user_id)
-
-    if not user:
-        return render_template("shared/404.html"), 404
-
     if request.method == "POST":
-        user.email = request.form["email"]
-        user.first_name = request.form["first_name"]
-        user.last_name = request.form["last_name"]
-        user.phone = request.form["phone"]
-        user.address = request.form["address"]
-        user.profile_img = request.form["profile_img"]
-        user.updated_at = datetime.now()
-        details = "some new address"
+        record = model.create(**form_data(model))
 
-        try:
-            user.info.address = details
-        except:
-            details = UserInfo(address=details)
-            user.info = details
+        sync_relationships(
+            resource,
+            record,
+            request.form
+        )
 
-        user.save()
+        return redirect(
+            url_for(
+                "routes.crud",
+                resource=resource,
+                id=record.id
+            )
+        )
 
-        return redirect(url_for("routes.home"))
+    if request.method == "GET":
+        return render_resource(
+            resource,
+            "index",
+            objects=model.select()
+        )
 
-    return render_template("users/edit.html", user=user)
+    return "Invalid Request", 400
 
-# DELETE - USER
-@routes.route("/users/<int:user_id>/delete", methods=["POST", "GET"])
-@login_required
-def delete_user(user_id):
-    user = User.get_or_none(User.id == user_id)
 
-    if not user:
-        return render_template("shared/404.html"), 404
+def handle_record(model, resource, record, action):
+    if action == "edit" and request.method == "GET":
+        return render_resource(
+            resource,
+            "edit",
+            object=record,
+            **relationship_context(resource, record)
+        )
 
-    user.delete_instance(recursive=True)
+    if action == "delete" or request.method == "DELETE":
+        record.delete_instance()
 
-    return redirect(url_for("routes.home"))
+        return redirect(
+            url_for(
+                "routes.crud",
+                resource=resource
+            )
+        )
 
-# ITEMS
-@routes.route('/items', defaults={'id': None}, methods=['GET', 'POST'])
-@routes.route('/items/<int:id>', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def items(id):
-    method = request.form.get('_method', request.method).upper()
+    if request.method in ["POST", "PUT"]:
+        for key, value in form_data(model).items():
+            setattr(record, key, value)
 
-    if id is None:
-        if method == 'GET':
-            if request.args.get('action') == 'new':
-                return render_template('items/new.html')
-            
-            items = Item.select().order_by(Item.created_at.desc())
-            return render_template('items/index.html', items=items)
+        record.save()
 
-        if method == 'POST':
-            Item.create(**request.form.to_dict())
-            flash('Item created successfully!')
-            return redirect(url_for('routes.items'))
+        sync_relationships(
+            resource,
+            record,
+            request.form
+        )
 
-    item = Item.get_or_none(Item.id == id)
+        return redirect(
+            url_for(
+                "routes.crud",
+                resource=resource,
+                id=record.id
+            )
+        )
 
-    if not item:
-        return render_template('shared/404.html'), 404
+    if request.method == "GET":
+        return render_resource(
+            resource,
+            "show",
+            object=record
+        )
 
-    if method == 'GET':
-        if request.args.get('action') == 'edit':
-            return render_template('items/edit.html', item=item)
-        return render_template('items/show.html', item=item)
+    return "Invalid Request", 400
 
-    if method in ['POST', 'PUT']:
-        for key, value in request.form.items():
-            if key != '_method':
-                setattr(item, key, value)
-        item.save()
-        flash('Item updated successfully!')
-        return redirect(url_for('routes.items', id=item.id))
 
-    if method == 'DELETE':
-        item.delete_instance(recursive=True)
-        flash('Item deleted successfully!')
-        return redirect(url_for('routes.items'))
+# Admin Routes
 
-# ITEMS
-@routes.route('/roles', defaults={'id': None}, methods=['GET', 'POST'])
-@routes.route('/roles/<int:id>', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def roles(id):
-    method = request.form.get('_method', request.method).upper()
+def render_admin_tab(tab, query, template):
+    if request.headers.get("HX-Request"):
+        return render_template(
+            template,
+            **{tab: query}
+        )
 
-    if id is None:
-        if method == 'GET':
-            if request.args.get('action') == 'new':
-                return render_template('roles/new.html')
-            
-            roles = Role.select()
-            return render_template('roles/index.html', roles=roles)
+    return render_template(
+        "admin.html",
+        active_tab=tab,
+        **{tab: query}
+    )
 
-        if method == 'POST':
-            Role.create(**request.form.to_dict())
-            flash('Role created successfully!')
-            return redirect(url_for('routes.roles'))
+@routes.route("/admin", methods=['GET'])
+@routes.route("/admin/users", methods=['GET'])
+def admin_users():
+    return render_admin_tab(
+        "users",
+        User.select().order_by(User.created_at.desc()),
+        "partials/_users_table.html"
+    )
 
-    role = Role.get_or_none(Role.id == id)
+@routes.route("/admin/items", methods=['GET'])
+def admin_items():
+    return render_admin_tab(
+        "items",
+        Item.select().order_by(Item.created_at.desc()),
+        "partials/_items_table.html"
+    )
 
-    if not role:
-        return render_template('shared/404.html'), 404
+@routes.route("/admin/roles", methods=['GET'])
+def admin_roles():
+    return render_admin_tab(
+        "roles",
+        Role.select(),
+        "partials/_roles_table.html"
+    )
 
-    if method == 'GET':
-        if request.args.get('action') == 'edit':
-            return render_template('roles/edit.html', role=role)
-        return render_template('roles/show.html', role=role)
+# Authentication Routes
 
-    if method in ['POST', 'PUT']:
-        for key, value in request.form.roles():
-            if key != '_method':
-                setattr(role, key, value)
-        role.save()
-        flash('Role updated successfully!')
-        return redirect(url_for('routes.roles', id=role.id))
-
-    if method == 'DELETE':
-        role.delete_instance(recursive=True)
-        flash('Role deleted successfully!')
-        return redirect(url_for('routes.roles'))
-    
-# Authentication
-@auth.route("/login", methods=["POST", "GET"])
+@auth.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
-        return render_template("auth/login.html", value=[1, 2])
+        return render_template("auth/login.html")
 
-    email = request.form["email"]
-    password = request.form["password"]
+    email = request.form.get("email")
+    password = request.form.get("password")
 
     user = User.get_or_none(User.email == email)
 
     if not user:
         return render_template(
             "auth/login.html",
-            message="Invalid User",
+            message="Invalid User"
         ), 404
 
-    if password != user.password:
+    if user.password != password:
         return render_template(
             "auth/login.html",
-            message="Invalid Password",
+            message="Invalid Password"
         )
 
     login_user(user)
 
     return redirect(url_for("routes.home"))
 
-
-@auth.route("/register", methods=["POST", "GET"])
+@auth.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "GET":
-        return render_template("auth/register.html", value=[1, 2])
+        return render_template("auth/register.html")
 
-    first_name = request.form["first_name"]
-    last_name = request.form["last_name"]
-    email = request.form["email"]
-    password = request.form["password"]
+    email = request.form.get("email")
 
-    user = User.get_or_none(User.email == email)
-
-    if not user:
-        new_user = User.create(
-            email=email,
-            password=password,
-            first_name=first_name,
-            last_name=last_name,
+    if User.get_or_none(User.email == email):
+        return render_template(
+            "auth/register.html",
+            message="User already exists"
         )
 
-        login_user(new_user)
-
-        return redirect(url_for("routes.home"))
-
-    return render_template(
-        "auth/register.html",
-        message="User already exists",
+    user = User.create(
+        email=email,
+        password=request.form.get("password"),
+        first_name=request.form.get("first_name"),
+        last_name=request.form.get("last_name")
     )
 
+    login_user(user)
+
+    return redirect(url_for("routes.home"))
 
 @auth.route("/logout", methods=["GET"])
 @login_required
 def logout():
     logout_user()
-    return render_template("auth/login.html")
+
+    return redirect(url_for("auth.login"))
+
+# CRUD Helpers
+def get_model(resource):
+    if resource.endswith("ies"):
+        model_name = resource[:-3].title() + "y"
+    else:
+        model_name = "".join(
+            word.title()
+            for word in resource.rstrip("s").split("_")
+        )
+
+    for model in BaseModel.__subclasses__():
+        if model.__name__ == model_name:
+            return model
+
+    abort(
+        404,
+        description=f"Resource '{resource}' not found"
+    )
+
+
+def get_record(model, id):
+    """Gets data model by ID
+        Args:
+            model (BaseModel): database data model
+            id (int): ID of the data model
+    
+        Returns:
+            BaseModel: Data model from the database
+    """
+    try:
+        return model.get_by_id(id)
+    except DoesNotExist:
+        abort(
+            404,
+            description=f"Record #{id} not found in {model.__name__}"
+        )
+
+def form_data(model):
+    fields = model._meta.fields
+    data = {}
+
+    for key, value in request.form.items():
+        if key in fields and key != "id":
+            data[key] = value if value != "" else None
+
+    for key in request.files:
+        if key not in fields or key == "id":
+            continue
+
+        files = request.files.getlist(key)
+
+        uploaded = []
+
+        for file in files:
+            if not file or not file.filename:
+                continue
+
+            filename = handle_upload(file)
+
+            if filename:
+                uploaded.append(filename)
+
+        if uploaded:
+            data[key] = uploaded[0] if len(uploaded) == 1 else uploaded
+
+    return data
+
+def handle_upload(file):
+    upload_folder = app.config["UPLOAD_FOLDER"]
+    os.makedirs(upload_folder, exist_ok=True)
+    filename = secure_filename(file.filename)
+    if not filename:
+        return None
+    file.save(os.path.join(upload_folder, filename))
+    return filename
+
+def render_resource(resource, template, **context):
+    return render_template(
+        f"{resource}/{template}.html",
+        resource=resource,
+        **context
+    )
+
+# def handle_upload(file):
+#     """
+#     Save an uploaded file and return its filename.
+#     """
+#     upload_folder = app.config["UPLOAD_FOLDER"]
+#     os.makedirs(upload_folder, exist_ok=True)
+#     filename = secure_filename(file.filename)
+#     if not filename:
+#         return None
+#     file_path = os.path.join(upload_folder, filename)
+#     file.save(file_path)
+#     return filename
+
+def relationship_context(resource, record=None):
+    context = {}
+
+    for relationship in RELATIONSHIPS.get(resource, []):
+        model = relationship["model"]
+        context_key = relationship["context"]
+
+        context[f"all_{context_key}"] = model.select()
+
+        if record is None:
+            context[f"current_{context_key}_ids"] = []
+            continue
+
+        junction = relationship["junction"]
+        parent = relationship["parent"]
+        child = relationship["child"]
+
+        query = (
+            junction
+            .select(getattr(junction, child.name))
+            .where(parent == record)
+        )
+
+        context[f"current_{context_key}_ids"] = [
+            getattr(row, child.name).id
+            for row in query
+        ]
+
+    return context
+
+
+def sync_relationships(resource, record, form):
+    for relationship in RELATIONSHIPS.get(resource, []):
+        form_key = relationship["form_key"]
+        junction = relationship["junction"]
+        parent = relationship["parent"]
+        child = relationship["child"]
+
+        selected_ids = form.getlist(
+            form_key,
+            type=int
+        )
+
+        junction.delete().where(
+            parent == record
+        ).execute()
+
+        if not selected_ids:
+            continue
+
+        rows = [
+            {
+                parent.name: record.id,
+                child.name: selected_id
+            }
+            for selected_id in selected_ids
+        ]
+
+        junction.insert_many(rows).execute()

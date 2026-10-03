@@ -5,46 +5,41 @@
   <div class="flex justify-content-between align-items-center mb-3">
     <h1 class="text-4xl">Items</h1>
     {# Points to /items?action=new #}
-    <a href="{{ url_for('routes.items', action='new') }}" class="ml-2 btn btn-primary">
+    <a href="{{ url_for('routes.crud', action='new', resource='items') }}" class="ml-2 btn btn-primary">
       + Add New Item
     </a>
   </div>
 
-  {% if items %}
-    <table class="table table-striped mt-4">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in items %}
-          <tr>
-            <td>{{ item.id }}</td>
-            <td>{{ item.name }}</td>
-            <td class="flex gap-2">
-               <a href="{{ url_for('routes.items', id=item.id) }}" class="btn btn-sm btn-info">
-    View
-  </a>
-              <a href="{{ url_for('routes.items', id=item.id, action='edit') }}" class="btn btn-sm btn-outline-secondary">
-                Edit
-              </a>
+  {% if objects %}
+  {% for item in objects %}
 
-              <form action="{{ url_for('routes.items', id=item.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?');">
-                <input type="hidden" name="_method" value="DELETE">
-                <button type="submit" class="btn btn-sm btn-outline-danger">
-                  Delete
-                </button>
-              </form>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <div>
+    <p>{{item.name}}</p>
+    <p> {{item.description}}</p>
+  </div>
+  <div class="flex gap-x-4">
+    <a href="{{ url_for('routes.crud', id=item.id, action='show', resource='items') }}" class="btn btn-sm btn-info">
+      View
+    </a>
+    <a href="{{ url_for('routes.crud', id=item.id, action='edit', resource='items') }}"
+      class="btn btn-sm btn-outline-secondary">
+      Edit
+    </a>
+
+    <form action="{{ url_for('routes.crud', id=item.id, resource='items',action='delete') }}" method="POST"
+      class="d-inline" onsubmit="return confirm('Are you sure?');">
+      <input type="hidden" name="_method" value="DELETE">
+      <button type="submit" class="btn btn-sm btn-outline-danger">
+        Delete
+      </button>
+    </form>
+  </div>
+  <hr class="my-4" />
+
+  {% endfor %}
+
   {% else %}
-    <p>No items found.</p>
+  <p>No items found.</p>
   {% endif %}
 </div>
 {% endblock %}

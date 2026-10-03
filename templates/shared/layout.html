@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- <link rel="stylesheet" href="{{url_for('static', filename='css/tiny.css')}}"> -->
     <!-- <link rel="stylesheet" href="{{url_for('static', filename='css/tw.css')}}"> -->
+      <link rel="stylesheet" href="{{url_for('static', filename='css/simple.css')}}">
     <title>Flask Template App</title>
 </head>
 
@@ -15,8 +16,9 @@
 
     {% include './shared/nav.html' %}
 
-    <div class="p-4">
-    {% block content %} {% endblock %}
+    <div class="p-4 flex">
+    {% include 'components/_sidebar.html' %}
+    <div class="w-full">{% block content %} {% endblock %}</div>
     </div>
 
     <script src="https://cdn.tailwindcss.com"></script>
