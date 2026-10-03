@@ -1,0 +1,18 @@
+UPLOAD
+
+<form method="POST" enctype="multipart/form-data">
+  <!-- Item Dropdown -->
+  <label for="item_id">Select Item:</label>
+  <select name="item_id" id="item_id" required>
+    <option value="" disabled selected>-- Choose an Item --</option>
+    {% for item in items %}
+      <option value="{{ item.id }}">{{ item.name }}</option>
+    {% endfor %}
+  </select>
+
+  <!-- File Input -->
+  <label for="files">Upload Images:</label>
+  <input type="file" name="files" id="files" multiple required>
+
+  <button type="submit">Upload</button>
+</form>

@@ -11,40 +11,33 @@
   </div>
 
   {% if objects %}
-    <table class="table table-striped mt-4">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for object in objects %}
-          <tr>
-            <td>{{ object.id }}</td>
-            <td>{{ object.name }}</td>
-            <td class="flex gap-2">
-               <a href="{{ url_for('routes.crud', id=object.id, resource='roles') }}" class="btn btn-sm btn-info">
-    View
-  </a>
-              <a href="{{ url_for('routes.crud', id=object.id, action='edit', resource='roles') }}" class="btn btn-sm btn-outline-secondary">
-                Edit
-              </a>
 
-              <form action="{{ url_for('routes.crud', id=object.id, resource='roles') }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?');">
-                <input type="hidden" name="_method" value="DELETE">
-                <button type="submit" class="btn btn-sm btn-outline-danger">
-                  Delete
-                </button>
-              </form>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  {% for object in objects %}
+  <p>
+    {{object.name}}
+  </p>
+  <div class="flex gap-x-4">
+    <a href="{{ url_for('routes.crud', id=object.id, resource='roles') }}" class="btn btn-sm btn-info">
+      View
+    </a>
+    <a href="{{ url_for('routes.crud', id=object.id, action='edit', resource='roles') }}"
+      class="btn btn-sm btn-outline-secondary">
+      Edit
+    </a>
+
+    <form action="{{ url_for('routes.crud', id=object.id, resource='roles') }}" method="POST" class="d-inline"
+      onsubmit="return confirm('Are you sure?');">
+      <input type="hidden" name="_method" value="DELETE">
+      <button type="submit" class="btn btn-sm btn-outline-danger">
+        Delete
+      </button>
+    </form>
+  </div>
+  <hr class="my-4" />
+  {% endfor %}
+
   {% else %}
-    <p>No roles found.</p>
+  <p>No roles found.</p>
   {% endif %}
 </div>
 {% endblock %}

@@ -1,14 +1,14 @@
 from datetime import datetime
-
 from flask import Blueprint, render_template, request, redirect, url_for, abort
 from flask_login import login_user, login_required, logout_user
 from peewee import DoesNotExist
-
-from models import User, UserInfo, Item, UserItem, Role, BaseModel
+from models import User, Item, UserItem, Role, BaseModel, Image
 from modules.BaseModule import BaseModule
 from modules.ScriptRunner import ScriptRunner
 from modules.PasswordGenerator import PasswordGenerator
-
+from extensions import app
+import os
+from werkzeug.utils import secure_filename
 
 routes = Blueprint(
     "routes",
@@ -23,7 +23,6 @@ auth = Blueprint(
     static_folder="static",
     template_folder="templates"
 )
-
 
 RELATIONSHIPS = {
     "users": [
@@ -49,10 +48,56 @@ RELATIONSHIPS = {
     ],
 }
 
+@routes.route('/file-upload', methods=['GET', 'POST'])
+@login_required
+def upload():
+    if request.method == "GET":
+        items = Item.select()
+        return render_template("upload.html", items=items)
+    
+    item_id = request.form.get('item_id')
+    item = Item.get_by_id(item_id)
+    
+    files = request.files.getlist('files')
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    
+    for file in files:
+        if file.filename == '':
+            continue
+            
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        Image.create(url=filename, item=item)
 
-# -------------------------------------------------------------------
+    return redirect(url_for('routes.upload'))
+
+import os
+from flask import flash, redirect, request, url_for
+
+@routes.route('/image/<int:image_id>/delete', methods=['POST'])
+@login_required
+def delete_image(image_id):
+    # 1. Fetch the image record or 404
+    image = Image.get_or_none(Image.id == image_id)
+    if not image:
+        flash("Image not found.", "error")
+        return redirect(request.referrer or url_for('routes.index'))
+    
+    # Save the item ID so you can redirect back to the item page later
+    item_id = image.item_id 
+
+    # 2. Delete the file from the filesystem if it exists
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], image.url)
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+    # 3. Delete the record from the Peewee database
+    image.delete_instance()
+
+    flash("Image deleted successfully.", "success")
+    return redirect(url_for('routes.crud', id=item_id, action='show', resource='items'))
+
 # General Routes
-# -------------------------------------------------------------------
 
 @routes.route("/ping", methods=["GET"])
 def ping():
@@ -67,11 +112,9 @@ def ping():
         f"Password: \n{password}"
     )
 
-
 @routes.route("/components", methods=["GET"])
 def components():
     return render_template("components/master_components.html")
-
 
 @routes.route("/", methods=["GET"])
 @login_required
@@ -79,20 +122,20 @@ def home():
     user = User.get_or_none(User.email == "admin@gmail.com")
     return render_template("index.html", user=user)
 
-
 @routes.route("/about", methods=["GET"])
 def about():
     return render_template("about.html")
-
 
 @routes.route("/contact", methods=["GET"])
 def contact():
     return render_template("contact.html")
 
+@routes.route("/settings", methods=["GET"])
+def settings():
+    return render_template("settings.html")
 
-# -------------------------------------------------------------------
+
 # Dynamic CRUD
-# -------------------------------------------------------------------
 
 @routes.route("/<resource>", methods=["GET", "POST"])
 @routes.route("/<resource>/<action>", methods=["GET", "POST"])
@@ -107,7 +150,6 @@ def crud(resource="users", id=None, action=None):
     record = get_record(model, id)
 
     return handle_record(model, resource, record, action)
-
 
 def handle_collection(model, resource, action):
     if action == "new" and request.method == "GET":
@@ -193,9 +235,7 @@ def handle_record(model, resource, record, action):
     return "Invalid Request", 400
 
 
-# -------------------------------------------------------------------
 # Admin Routes
-# -------------------------------------------------------------------
 
 def render_admin_tab(tab, query, template):
     if request.headers.get("HX-Request"):
@@ -210,9 +250,8 @@ def render_admin_tab(tab, query, template):
         **{tab: query}
     )
 
-
-@routes.route("/admin")
-@routes.route("/admin/users")
+@routes.route("/admin", methods=['GET'])
+@routes.route("/admin/users", methods=['GET'])
 def admin_users():
     return render_admin_tab(
         "users",
@@ -220,8 +259,7 @@ def admin_users():
         "partials/_users_table.html"
     )
 
-
-@routes.route("/admin/items")
+@routes.route("/admin/items", methods=['GET'])
 def admin_items():
     return render_admin_tab(
         "items",
@@ -229,8 +267,7 @@ def admin_items():
         "partials/_items_table.html"
     )
 
-
-@routes.route("/admin/roles")
+@routes.route("/admin/roles", methods=['GET'])
 def admin_roles():
     return render_admin_tab(
         "roles",
@@ -238,11 +275,66 @@ def admin_roles():
         "partials/_roles_table.html"
     )
 
+# Authentication Routes
 
-# -------------------------------------------------------------------
+@auth.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "GET":
+        return render_template("auth/login.html")
+
+    email = request.form.get("email")
+    password = request.form.get("password")
+
+    user = User.get_or_none(User.email == email)
+
+    if not user:
+        return render_template(
+            "auth/login.html",
+            message="Invalid User"
+        ), 404
+
+    if user.password != password:
+        return render_template(
+            "auth/login.html",
+            message="Invalid Password"
+        )
+
+    login_user(user)
+
+    return redirect(url_for("routes.home"))
+
+@auth.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "GET":
+        return render_template("auth/register.html")
+
+    email = request.form.get("email")
+
+    if User.get_or_none(User.email == email):
+        return render_template(
+            "auth/register.html",
+            message="User already exists"
+        )
+
+    user = User.create(
+        email=email,
+        password=request.form.get("password"),
+        first_name=request.form.get("first_name"),
+        last_name=request.form.get("last_name")
+    )
+
+    login_user(user)
+
+    return redirect(url_for("routes.home"))
+
+@auth.route("/logout", methods=["GET"])
+@login_required
+def logout():
+    logout_user()
+
+    return redirect(url_for("auth.login"))
+
 # CRUD Helpers
-# -------------------------------------------------------------------
-
 def get_model(resource):
     if resource.endswith("ies"):
         model_name = resource[:-3].title() + "y"
@@ -263,6 +355,14 @@ def get_model(resource):
 
 
 def get_record(model, id):
+    """Gets data model by ID
+        Args:
+            model (BaseModel): database data model
+            id (int): ID of the data model
+    
+        Returns:
+            BaseModel: Data model from the database
+    """
     try:
         return model.get_by_id(id)
     except DoesNotExist:
@@ -270,7 +370,6 @@ def get_record(model, id):
             404,
             description=f"Record #{id} not found in {model.__name__}"
         )
-
 
 def form_data(model):
     fields = model._meta.fields
@@ -280,8 +379,36 @@ def form_data(model):
         if key in fields and key != "id":
             data[key] = value if value != "" else None
 
+    for key in request.files:
+        if key not in fields or key == "id":
+            continue
+
+        files = request.files.getlist(key)
+
+        uploaded = []
+
+        for file in files:
+            if not file or not file.filename:
+                continue
+
+            filename = handle_upload(file)
+
+            if filename:
+                uploaded.append(filename)
+
+        if uploaded:
+            data[key] = uploaded[0] if len(uploaded) == 1 else uploaded
+
     return data
 
+def handle_upload(file):
+    upload_folder = app.config["UPLOAD_FOLDER"]
+    os.makedirs(upload_folder, exist_ok=True)
+    filename = secure_filename(file.filename)
+    if not filename:
+        return None
+    file.save(os.path.join(upload_folder, filename))
+    return filename
 
 def render_resource(resource, template, **context):
     return render_template(
@@ -290,6 +417,18 @@ def render_resource(resource, template, **context):
         **context
     )
 
+# def handle_upload(file):
+#     """
+#     Save an uploaded file and return its filename.
+#     """
+#     upload_folder = app.config["UPLOAD_FOLDER"]
+#     os.makedirs(upload_folder, exist_ok=True)
+#     filename = secure_filename(file.filename)
+#     if not filename:
+#         return None
+#     file_path = os.path.join(upload_folder, filename)
+#     file.save(file_path)
+#     return filename
 
 def relationship_context(resource, record=None):
     context = {}
@@ -350,67 +489,3 @@ def sync_relationships(resource, record, form):
         ]
 
         junction.insert_many(rows).execute()
-
-
-# -------------------------------------------------------------------
-# Authentication Routes
-# -------------------------------------------------------------------
-
-@auth.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "GET":
-        return render_template("auth/login.html")
-
-    email = request.form.get("email")
-    password = request.form.get("password")
-
-    user = User.get_or_none(User.email == email)
-
-    if not user:
-        return render_template(
-            "auth/login.html",
-            message="Invalid User"
-        ), 404
-
-    if user.password != password:
-        return render_template(
-            "auth/login.html",
-            message="Invalid Password"
-        )
-
-    login_user(user)
-
-    return redirect(url_for("routes.home"))
-
-
-@auth.route("/register", methods=["GET", "POST"])
-def register():
-    if request.method == "GET":
-        return render_template("auth/register.html")
-
-    email = request.form.get("email")
-
-    if User.get_or_none(User.email == email):
-        return render_template(
-            "auth/register.html",
-            message="User already exists"
-        )
-
-    user = User.create(
-        email=email,
-        password=request.form.get("password"),
-        first_name=request.form.get("first_name"),
-        last_name=request.form.get("last_name")
-    )
-
-    login_user(user)
-
-    return redirect(url_for("routes.home"))
-
-
-@auth.route("/logout", methods=["GET"])
-@login_required
-def logout():
-    logout_user()
-
-    return redirect(url_for("auth.login"))

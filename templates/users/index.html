@@ -6,7 +6,7 @@
 
 {% for user in objects %}
 
-<div class="border rounded-lg p-4">
+<div>
     <p>Name:  {{user.first_name}} {{user.last_name}}</p>
     <p>Email: {{user.email}}</p>
 </div>
@@ -18,7 +18,7 @@
 
 <a href="{{url_for('routes.crud', action='new', resource='users')}}">New</a>
 </div>
-
+<hr class="my-4"/>
 {% endfor %}
 
 {%endblock%}

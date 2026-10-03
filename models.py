@@ -7,13 +7,13 @@ from peewee import (
     CompositeKey,
     TextField,
     BlobField,
-    IntegerField
+    IntegerField,
+    BigIntegerField
 )
 from datetime import datetime
 from flask_login import UserMixin
-from peewee import SqliteDatabase, Model
-
-db = SqliteDatabase("data.db")
+from peewee import Model
+from extensions import db
 
 class BaseModel(Model):
     class Meta:
@@ -47,7 +47,6 @@ class UserInfo(BaseModel):
 
     class Meta:
         table_name = "user_info"
-
 
 class User(UserMixin, BaseModel):
     id = AutoField()
@@ -110,19 +109,34 @@ class Item(BaseModel):
     class Meta:
         table_name = "items"
 
+class Media(BaseModel):
+    # TODO: Replace Image,Video etc with this eventually
+    item = ForeignKeyField(Item, backref="media", null=True)
+    filename = CharField()
+    original_filename = CharField(null=True)
+    path = CharField()
 
+    mime_type = CharField(null=True)
+    extension = CharField(null=True)
+
+    size = BigIntegerField(null=True)
+
+    created_at = DateTimeField(default=datetime.now)
+
+    def __str__(self):
+        return self.filename
+    
 # Many-To-Many
 class UserItem(BaseModel):
     user = ForeignKeyField(
         User, backref="user_links", null=True, on_delete="CASCADE"
-    )  # <-- Changed from 'items'
+    )
     item = ForeignKeyField(
         Item, backref="item_links", null=True, on_delete="CASCADE"
-    )  # <-- Changed from 'users'
+    )
 
     class Meta:
         table_name = "user_items"
-
 
 class Moderator(BaseModel):
     moderator_id = AutoField()
@@ -137,7 +151,6 @@ class Moderator(BaseModel):
     class Meta:
         table_name = "moderator"
 
-
 class Guest(BaseModel):
     moderator_id = AutoField()
     user = ForeignKeyField(
@@ -150,7 +163,6 @@ class Guest(BaseModel):
 
     class Meta:
         table_name = "guest"
-
 
 class Administrator(BaseModel):
     administrator_id = AutoField()
@@ -296,10 +308,11 @@ class Photo(BaseModel):
         table_name = "photos"
 
 
-class Images(BaseModel):
+class Image(BaseModel):
     user = ForeignKeyField(User, backref="images", null=True, on_delete="CASCADE")
     item = ForeignKeyField(Item, backref="images", null=True, on_delete="CASCADE")
     title = CharField(null=True)
+    filename = CharField(null=True)
     description = TextField(null=True)
     url = CharField(null=True)
     data = BlobField(null=True)
@@ -309,10 +322,11 @@ class Images(BaseModel):
         table_name = "images"
 
 
-class Videos(BaseModel):
+class Video(BaseModel):
     user = ForeignKeyField(User, backref="videos", null=True, on_delete="CASCADE")
-    item = ForeignKeyField(Item, backref="images", null=True, on_delete="CASCADE")
+    item = ForeignKeyField(Item, backref="videos", null=True, on_delete="CASCADE")
     title = CharField(null=True)
+    filename = CharField(null=True)
     description = TextField(null=True)
     url = CharField(null=True)
     data = BlobField(null=True)

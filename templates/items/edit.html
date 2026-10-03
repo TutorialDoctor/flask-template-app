@@ -4,22 +4,27 @@
 {% block content %}
 <h1 class="text-4xl">Edit Item</h1>
 
-<form class="grid gap-2" method="POST"
-	action="{{url_for('routes.crud', id=object.id,resource='items', action='edit')}}">
-	<input name="name" value="{{object.name}}">
-	<input name="description" value="{{object.description}}">
+<form method="POST" action="{{url_for('routes.crud', id=object.id,resource='items', action='edit')}}">
 
-	<div class="mt-4">
+  {% set names= ['name','description']%}
+  {% for name in names %}
+  <div>
+    <label for="name" class="uppercase">{{name}}</label>
+    <input type="text" name="{{name}}" value="{{object[name]}}" id="name" placeholder="http://" />
+  </div>
+  {% endfor %}
+
+  <div class="mt-4">
     <label class="block font-bold mb-1">Assigned Users</label>
     <select name="user_ids" multiple class="border p-2 w-full h-32 rounded">
       {% for user in all_users %}
-        <option value="{{ user.id }}" {% if user.id in current_users_ids %}selected{% endif %}>
-          {{ user.first_name }} {{ user.last_name }} ({{ user.email }})
-        </option>
+      <option value="{{ user.id }}" {% if user.id in current_users_ids %}selected{% endif %}>
+        {{ user.first_name }} {{ user.last_name }} ({{ user.email }})
+      </option>
       {% endfor %}
     </select>
   </div>
 
-	<input type="submit" value="Submit">
+  <input type="submit" value="Submit">
 </form>
 {% endblock %}
